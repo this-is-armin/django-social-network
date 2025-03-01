@@ -30,7 +30,7 @@
         <a href="{% url 'account:user_create_image' user %}" class="btn btn-outline-secondary">Add favorites Image</a>
         <a href="{% url 'account:user_settings' user %}" class="btn btn-outline-info">Settings</a>
     </div>
-    {% elif request.user.id != userid and is_follow == False %}
+    {% elif request.user.id != user.id and is_follow == False %}
     <a href="{% url 'account:user_follow' user %}" class="btn btn-outline-primary w-100">Follow</a>
     {% elif request.user.id != user.id and is_follow == True %}
     <a href="{% url 'account:user_unfollow' user %}" class="btn btn-outline-danger w-100">Unfollow</a>

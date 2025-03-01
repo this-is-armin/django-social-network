@@ -22,7 +22,7 @@ class UserRegisterForm(forms.Form):
         username = self.cleaned_data['username']
         user = User.objects.filter(username=username)
 
-        invalid_chars = ['<','>', '(',')', '[',']', '{','}', '.', ',', '/', '\\', '|', '=', '-', '`', '@', '#', '$', '%', '^', '*', '&', 'username']
+        invalid_chars = ['<','>', '(',')', '[',']', '{','}', ',', '/', '\\', '|', '=', '-', '`', '@', '#', '$', '%', '^', '*', '&', 'username']
         for char in invalid_chars:
             if char in username:
                 raise ValidationError('Your username has invalid char(s)..!')
