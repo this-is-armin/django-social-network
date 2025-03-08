@@ -20,20 +20,20 @@ class RelationAdmin(admin.ModelAdmin):
 
 @admin.register(Music)
 class MusicAdmin(admin.ModelAdmin):
-    list_display = ['id', 'auther', 'singer_name', 'music_name', 'created']
-    list_display = ['auther', 'singer_name', 'music_name', 'created']
+    list_display = ['id', 'user', 'singer_name', 'music_name', 'created']
+    list_display = ['user', 'singer_name', 'music_name', 'created']
 
 
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ['id', 'auther', 'created']
-    list_filter = ['id', 'auther', 'created']
+    list_display = ['id', 'user', 'created']
+    list_filter = ['id', 'user', 'created']
 
 
 @admin.register(Story)
 class StoryAdmin(admin.ModelAdmin):
-	list_display = ['id', 'auther', 'created']
-	list_filter = ['auther', 'created']
+	list_display = ['id', 'user', 'created']
+	list_filter = ['user', 'created']
 
 
 

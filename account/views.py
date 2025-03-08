@@ -8,8 +8,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 
 from .models import Relation, Music, Image, Story, Link
-from .forms import (UserRegisterForm, UserLoginForm, UserUpdateProfileForm, UserMusicCreateForm, UserImageCreateForm, 
-                    UserSearchForm, UserStoryCreateForm, UserLinkCreateForm)
+from .forms import (UserRegisterForm, UserLoginForm, UserUpdateProfileForm, UserMusicCreateForm, UserImageCreateForm, UserSearchForm, UserStoryCreateForm, UserLinkCreateForm)
 
 
 page_urls = {
@@ -23,15 +22,12 @@ class UserRegisterView(View):
     form_class = UserRegisterForm
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return redirect(page_urls['home'])
+        if request.user.is_authenticated: return redirect(page_urls['home'])
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
         form = self.form_class()
-        return render(request, self.template_name, {
-            'form' : form
-        })
+        return render(request, self.template_name, {'form' : form})
 
     def post(self, request):
         form = self.form_class(request.POST)
@@ -42,12 +38,9 @@ class UserRegisterView(View):
             user.first_name = cd['first_name']
             user.last_name = cd['last_name']
             user.save()
-            messages.success(request, 'You have registered successfully!', 'success')
+            messages.success(request, 'Registration was successfull', 'success')
             return redirect(page_urls['login'])
-        else:
-            return render(request, self.template_name, {
-                'form' : form
-            })
+        return render(request, self.template_name, {'form':form})
 
 
 class UserLoginView(View):
@@ -55,15 +48,12 @@ class UserLoginView(View):
     form_class = UserLoginForm
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return redirect(page_urls['home'])
+        if request.user.is_authenticated: return redirect(page_urls['home'])
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
         form = self.form_class()
-        return render(request, self.template_name, {
-            'form' : form
-        })
+        return render(request, self.template_name, {'form':form})
 
     def post(self, request):
         form = self.form_class(request.POST)
@@ -71,42 +61,33 @@ class UserLoginView(View):
         if form.is_valid():
             cd = form.cleaned_data
             user = authenticate(username=cd['username'], password=cd['password'])
-
             if user is not None:
                 login(request, user)
-                messages.success(request, 'You have loged-in successfully!', 'success')
+                messages.success(request, 'Login was successfull', 'success')
                 return redirect(page_urls['home'])
-            else:
-                messages.error(request, 'Username or Password is wrong!', 'danger')
-                return redirect(page_urls['login'])
-        else:
-            return render(request, self.template_name, {
-                'form' : form
-            })
+            messages.error(request, 'Username or Password incorrect', 'danger')
+            return redirect(page_urls['login'])
+        return render(request, self.template_name, {'form':form})
 
 
 def user_logout_view(request):
-    if not request.user.is_authenticated:
-        return redirect(page_urls['home'])
-    else:
-        logout(request)
-        messages.success(request, 'You have loged-out sccessfully!', 'success')
-        return redirect(page_urls['home'])
+    if not request.user.is_authenticated: return redirect(page_urls['home'])
+    logout(request)
+    messages.success(request, 'Logout was successfull', 'success')
+    return redirect(page_urls['home'])
 
 
 class UserChangePasswordView(SuccessMessageMixin, PasswordChangeView, View):
     template_name = 'account/change_password.html'
-    success_message = "You have changed the password successfully"
+    success_message = "The password was changed"
     success_url = reverse_lazy('account:user_password_change')
 
 
-def user_settings_view(request, username):
-    user = get_object_or_404(User, username=username)
+def user_settings_view(request, **kwargs):
+    user = get_object_or_404(User, username=kwargs['username'])
     if not request.user.is_authenticated: return redirect(page_urls['home'])
-    if request.user != user:
-        messages.error(request, 'You don`t have access to this section', 'danger')
-        return redirect('account:user_profile', user)
-    return render(request, 'account/settings.html', {'user' : user})
+    if request.user != user: return redirect('account:user_profile', user)
+    return render(request, 'account/settings.html', {'user':user})
 
 
 class UsersView(View):
@@ -114,8 +95,7 @@ class UsersView(View):
     form_class = UserSearchForm
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect(page_urls['home'])
+        if not request.user.is_authenticated: return redirect(page_urls['home'])
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
@@ -126,43 +106,30 @@ class UsersView(View):
             search_text = request.GET.get('search_text')
             users = users.filter(username__contains=search_text)
 
-        return render(request, self.template_name, {
-            'users' : users,
-            'form' : form
-        })
+        return render(request, self.template_name, {'users':users, 'form':form})
 
 
 class UserProfileView(View):
     template_name = 'account/profile.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect(page_urls['home'])
+        if not request.user.is_authenticated: return redirect(page_urls['home'])
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, **kwargs):
         user = get_object_or_404(User, username=kwargs['username'])
-        relation = Relation.objects.filter(from_user=request.user, to_user=user)
+        relation_exists = Relation.objects.filter(from_user=request.user, to_user=user).exists()
         links = user.links.all()
         stories = user.stories.all()
         posts = user.posts.all()
+        saved_posts = user.saved_posts.all()
         musics = user.musics.all()
         images = user.images.all()
 
-        if relation.exists():
-            is_follow = True
-        else:
-            is_follow = False
+        if relation_exists: is_follow = True
+        else: is_follow = False
 
-        return render(request, self.template_name, {
-            'user' : user,
-            'links' : links,
-            'stories' : stories,
-            'posts' : posts,
-            'musics' : musics,
-            'images' : images,
-            'is_follow' : is_follow
-        })
+        return render(request, self.template_name, {'user':user, 'links':links, 'stories':stories, 'posts':posts, 'saved_posts':saved_posts, 'musics':musics, 'images':images, 'is_follow':is_follow})
 
 
 class UserDeleteView(View):
@@ -171,17 +138,14 @@ class UserDeleteView(View):
         return super().setup(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect(page_urls['home'])
-        if request.user != self.user_instance:
-            messages.error(request, 'You can`t delete this account!', 'danger')
-            return redirect('account:user_profile', self.user_instance)
+        if not request.user.is_authenticated: return redirect(page_urls['home'])
+        if request.user != self.user_instance: return redirect('account:user_profile', self.user_instance)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, **kwargs):
         user = self.user_instance
         user.delete()
-        messages.success(request, 'Your account deleted successfully!', 'success')
+        messages.success(request, 'The account was deleted', 'success')
         return redirect(page_urls['home'])
 
 
@@ -194,23 +158,16 @@ class UserUpdateProfileView(View):
         return super().setup(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect(page_urls['home'])
-        if request.user.pk != self.user_instance.pk:
-            messages.error(request, 'You can`t update this profile', 'danger')
-            return redirect('account:user_profile', self.user_instance)
+        if not request.user.is_authenticated: return redirect(page_urls['home'])
+        if request.user.pk != self.user_instance.pk: return redirect('account:user_profile', self.user_instance)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, **kwargs):
         user = self.user_instance
-        INITIAL = {'first_name':user.first_name, 'last_name':user.last_name,
-                   'email':user.email}
+        INITIAL = {'first_name':user.first_name, 'last_name':user.last_name, 'email':user.email}
         form = self.form_class(instance=user.profile, initial=INITIAL)
 
-        return render(request, self.template_name, {
-            'form' : form,
-            'user' : user
-        })
+        return render(request, self.template_name, {'form':form, 'user':user})
 
     def post(self, request, **kwargs):
         user = self.user_instance
@@ -224,30 +181,35 @@ class UserUpdateProfileView(View):
             user.last_name = cd['last_name']
             user.email = cd['email']
             user.save()
-            messages.success(request, 'You have updated the profile successfully!', 'success')
+            messages.success(request, 'The profile was updated', 'success')
             return redirect('account:user_profile', user.username)
-        else:
-            return render(request, self.template_name, {
-                'form' : form
-            })
+        return render(request, self.template_name, {'form':form})
 
 
 class UserPostsView(View):
     template_name = 'account/posts.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect(page_urls['home'])
+        if not request.user.is_authenticated: return redirect(page_urls['home'])
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, **kwargs):
         user = get_object_or_404(User, username=kwargs['username'])
         posts = user.posts.all()
+        return render(request, self.template_name, {'user':user, 'posts':posts})
 
-        return render(request, self.template_name, {
-            'user' : user,
-            'posts' : posts
-        })
+
+class UserSavedPostsView(View):
+    template_name = 'account/saved_posts.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated: return redirect(page_urls['home'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, **kwargs):
+        user = get_object_or_404(User, username=kwargs['username'])
+        saved_posts = user.saved_posts.all()
+        return render(request, self.template_name, {'user':user, 'saved_posts':saved_posts})
 
 
 class UserFollowView(View):
@@ -256,21 +218,17 @@ class UserFollowView(View):
         return super().setup(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect(page_urls['home'])
-        if request.user.pk == self.user_instance.pk:
-            return redirect('account:user_profile', request.user)
+        if not request.user.is_authenticated: return redirect(page_urls['home'])
+        if request.user.pk == self.user_instance.pk: return redirect('account:user_profile', request.user)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, **kwargs):
         user = self.user_instance
-        relation = Relation.objects.filter(from_user=request.user, to_user=user)
+        relation_exists = Relation.objects.filter(from_user=request.user, to_user=user).exists()
 
-        if relation.exists():
-            messages.error(request, f"You already followed '{user}'", 'warning')
-        else:
+        if not relation_exists:
             Relation.objects.create(from_user=request.user, to_user=user).save()
-            messages.success(request, f"You have followed '{user}'", 'success')
+            messages.success(request, 'The user was followed', 'success')
         return redirect('account:user_profile', user)
 
 
@@ -280,10 +238,8 @@ class UserUnfollowView(View):
         return super().setup(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect(page_urls['home'])
-        if request.user.pk == self.user_instance.pk:
-            return redirect('account:user_profile', request.user)
+        if not request.user.is_authenticated: return redirect(page_urls['home'])
+        if request.user.pk == self.user_instance.pk: return redirect('account:user_profile', request.user)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, **kwargs):
@@ -292,35 +248,22 @@ class UserUnfollowView(View):
 
         if relation.exists():
             relation.delete()
-            messages.success(request, f"You have unfollowed '{user}'", 'success')
-        else:
-            messages.error(request, f"You have not followed '{user}'", 'warning')
+            messages.success(request, 'The user was unfollowed', 'success')
         return redirect('account:user_profile', user)
 
 
 def user_followers_view(request, **kwargs):
-    if not request.user.is_authenticated:
-        return redirect(page_urls['home'])
+    if not request.user.is_authenticated: return redirect(page_urls['home'])
     user = get_object_or_404(User, username=kwargs['username'])
     followers = user.followers.all()
-
-    return render(request, 'account/followers.html', {
-        'user' : user,
-        'followers' : followers
-    })
+    return render(request, 'account/followers.html', {'user':user, 'followers':followers})
 
 
 def user_followings_view(request, **kwargs):
-    if not request.user.is_authenticated:
-        return redirect(page_urls['home'])
+    if not request.user.is_authenticated: return redirect(page_urls['home'])
     user = get_object_or_404(User, username=kwargs['username'])
     followings = user.followings.all()
-
-    return render(request, 'account/followings.html', {
-        'user' : user,
-        'followings' : followings
-    })
-
+    return render(request, 'account/followings.html', {'user':user, 'followings':followings})
 
 
 class UserMusicCreateView(View):
@@ -332,59 +275,40 @@ class UserMusicCreateView(View):
         return super().setup(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect(page_urls['home'])
-        if request.user != self.user_instance:
-            messages.error(request, 'You can not create music for this user', 'danger')
-            return redirect('account:user_profile', self.user_instance)
+        if not request.user.is_authenticated: return redirect(page_urls['home'])
+        if request.user != self.user_instance: return redirect('account:user_profile', self.user_instance)
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request, **kwargs):
-        user = self.user_instance
+    def get(self, request):
         form = self.form_class()
+        return render(request, self.template_name, {'form':form})
 
-        return render(request, self.template_name, {
-            'form' : form,
-        })
-
-    def post(self, request, **kwargs):
-        user = self.user_instance
+    def post(self, request):
         form = self.form_class(request.POST, request.FILES)
 
         if form.is_valid():
             music = form.save(commit=False)
-            music.auther = user
+            music.user = self.user_instance
             music.save()
-            messages.success(request, 'You have created a music successfully', 'success')
+            messages.success(request, 'The music was created', 'success')
             return redirect('account:user_profile', request.user)
-        else:
-            return render(request, self.template_name, {
-                'form' : form,
-            })
+        return render(request, self.template_name, {'form':form})
 
 
-def user_musics_view(request, username):
-    if not request.user.is_authenticated:
-        return redirect(page_urls['home'])
-    user = get_object_or_404(User, username=username)
+def user_musics_view(request, **kwargs):
+    if not request.user.is_authenticated: return redirect(page_urls['home'])
+    user = get_object_or_404(User, username=kwargs['username'])
     musics = user.musics.all()
-
-    return render(request, 'account/musics.html', {
-        'user' : user,
-        'musics' : musics
-    })
+    return render(request, 'account/musics.html', {'user':user, 'musics':musics})
 
 
-def user_music_delete_view(request, username, id):
-    user = get_object_or_404(User, username=username)
-    music = get_object_or_404(Music, id=id)
-    if not request.user.is_authenticated:
-        return redirect(page_urls['home'])
-    if request.user != user:
-        messages.error(request, 'You can`t delete the music', 'danger')
-    else:
+def user_music_delete_view(request, **kwargs):
+    user = get_object_or_404(User, username=kwargs['username'])
+    music = get_object_or_404(Music, pk=kwargs['pk'])
+    if not request.user.is_authenticated: return redirect(page_urls['home'])
+    if request.user == user:
         music.delete()
-        messages.success(request, 'You have deleted a music successfully', 'success')
+        messages.success(request, 'The music was deleted', 'success')
     return redirect('account:user_musics', user)
 
 
@@ -397,50 +321,39 @@ class UserImageCreateView(View):
         return super().setup(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect(page_urls['home'])
-        if request.user != self.user_instance:
-            messages.error(request, 'You can`t create image for this user', 'danger')
-            return redirect('account:user_profile', self.user_instance)
+        if not request.user.is_authenticated: return redirect(page_urls['home'])
+        if request.user != self.user_instance: return redirect('account:user_profile', self.user_instance)
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request, **kwargs):
-        user = self.user_instance
+    def get(self, request):
         form = self.form_class()
+        return render(request, self.template_name, {'form':form})
 
-        return render(request, self.template_name, {
-            'form' : form,
-        })
-
-    def post(self, request, **kwargs):
-        user = self.user_instance
+    def post(self, request):
         form = self.form_class(request.POST, request.FILES)
 
         if form.is_valid():
             cd = form.cleaned_data
-            Image.objects.create(auther=user, image_file=cd['image_file'])
-            messages.success(request, 'You have created a image successfully', 'success')
+            Image.objects.create(user=self.user_instance, image_file=cd['image_file'])
+            messages.success(request, 'The image was created', 'success')
             return redirect('account:user_profile', request.user)
-        return render(request, self.template_name, {
-            'form' : form,
-        })
+        return render(request, self.template_name, {'form':form})
 
 
-def user_images_view(request, username):
-    user = get_object_or_404(User, username=username)
+def user_images_view(request, **kwargs):
+    user = get_object_or_404(User, username=kwargs['username'])
     if not request.user.is_authenticated: return redirect(page_urls['home'])
     images = user.images.all()
-    return render(request, 'account/images.html', {
-        'images' : images
-    })
+    return render(request, 'account/images.html', {'images':images})
 
 
-def user_image_delete_view(request, username, id):
-    user = get_object_or_404(User, username=username)
-    image = get_object_or_404(Image, id=id)
+def user_image_delete_view(request, **kwargs):
+    user = get_object_or_404(User, username=kwargs['username'])
+    image = get_object_or_404(Image, pk=kwargs['pk'])
     if not request.user.is_authenticated: return redirect(page_urls['home'])
-    if request.user != user: messages.error(request, 'You can`t delete the image', 'danger')
-    else: image.delete(); messages.success(request, 'You have deleted a image successfully', 'success')
+    if request.user == user:
+        image.delete()
+        messages.success(request, 'The image was deleted', 'success')
     return redirect('account:user_images', user)
 
 
@@ -453,21 +366,15 @@ class UserStoryCreateView(View):
         return super().setup(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect(page_urls['home'])
-        if request.user != self.user_instance:
-            messages.error(request, 'You can`t create story for this user', 'danger')
-            return redirect('account:user_profile', self.user_instance)
+        if not request.user.is_authenticated: return redirect(page_urls['home'])
+        if request.user != self.user_instance: return redirect('account:user_profile', self.user_instance)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, **kwargs):
         user = self.user_instance
         form = self.form_class()
 
-        return render(request, self.template_name, {
-            'user' : user,
-            'form' : form 
-        })
+        return render(request, self.template_name, {'user':user, 'form':form})
 
     def post(self, request, **kwargs):
         user = self.user_instance
@@ -475,32 +382,26 @@ class UserStoryCreateView(View):
 
         if form.is_valid():
             cd = form.cleaned_data
-            Story.objects.create(auther=user, content=cd['content'])
-            messages.success(request, 'You have created a story successfully', 'success')
+            Story.objects.create(user=user, content=cd['content'])
+            messages.success(request, 'The story was created', 'success')
             return redirect('account:user_profile', user)
-        else:
-            return render(request, self.template_name, {
-                'user' : user,
-                'form' : form
-            })
+        return render(request, self.template_name, {'user':user, 'form':form})
 
 
-def user_stories_view(request, username):
-    user = get_object_or_404(User, username=username)
+def user_stories_view(request, **kwargs):
+    user = get_object_or_404(User, username=kwargs['username'])
     if not request.user.is_authenticated: return redirect(page_urls['home'])
     stories = user.stories.all()
-    return render(request, 'account/stories.html', {
-        'user' : user,
-        'stories' : stories
-    })
+    return render(request, 'account/stories.html', {'user':user, 'stories':stories})
 
 
-def user_story_delete_view(request, username, id):
-    user = get_object_or_404(User, username=username)
-    story = get_object_or_404(Story, id=id)
+def user_story_delete_view(request, **kwargs):
+    user = get_object_or_404(User, username=kwargs['username'])
+    story = get_object_or_404(Story, pk=kwargs['pk'])
     if not request.user.is_authenticated: return redirect(page_urls['home'])
-    if request.user != user: messages.error(request, 'You can`t delete the story', 'danger')
-    else: story.delete(); messages.success(request, 'You have deleted a story successfully', 'success')
+    if request.user == user:
+        story.delete()
+        messages.success(request, 'The story was deleted', 'success')
     return redirect('account:user_stories', user)
 
 
@@ -513,43 +414,37 @@ class UserLinkCreateView(View):
         return super().setup(request, *args, **kwargs)
     
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect(page_urls['home'])
-        if request.user != self.user_instance:
-            messages.error(request, 'You can`t create link for this user', 'danger')
-            return redirect('account:user_profile', self.user_instance)
+        if not request.user.is_authenticated: return redirect(page_urls['home'])
+        if request.user != self.user_instance: return redirect('account:user_profile', self.user_instance)
         return super().dispatch(request, *args, **kwargs)
     
-    def get(self, request, **kwargs):
-        user = self.user_instance
+    def get(self, request):
         form = self.form_class()
         return render(request, self.template_name, {'form':form})
     
-    def post(self, request, **kwargs):
-        user = self.user_instance
+    def post(self, request):
         form = self.form_class(request.POST)
 
         if form.is_valid():
             cd = form.cleaned_data
-            Link.objects.create(user=user, title=cd['title'], url=cd['url']).save()
-            messages.success(request, 'You have created a link successfully', 'success')
-            return redirect('account:user_profile', user.username)
-        else:
-            return render(request, self.template_name, {'form':form})
+            Link.objects.create(user=self.user_instance, title=cd['title'], url=cd['url']).save()
+            messages.success(request, 'The link was created', 'success')
+            return redirect('account:user_profile', self.user_instance)
+        return render(request, self.template_name, {'form':form})
 
 
-def user_links_view(request, username):
+def user_links_view(request, **kwargs):
     if not request.user.is_authenticated: return redirect(page_urls['home'])
-    user = get_object_or_404(User, username=username)
+    user = get_object_or_404(User, username=kwargs['username'])
     links = user.links.all()
     return render(request, 'account/links.html', {'user':user, 'links':links})
 
 
-def user_link_delete_view(request, username, id):
+def user_link_delete_view(request, **kwargs):
     if not request.user.is_authenticated: return redirect(page_urls['home'])
-    user = get_object_or_404(User, username=username)
-    link = get_object_or_404(Link, user=user, id=id)
+    user = get_object_or_404(User, username=kwargs['username'])
+    link = get_object_or_404(Link, user=user, pk=kwargs['pk'])
     link.delete()
-    messages.success(request, 'You have deleted a link successfully', 'success')
+    messages.success(request, 'The link was deleted', 'success')
     return redirect('account:user_profile', user.username)
 

@@ -1,8 +1,9 @@
 from django import forms
+
 from froala_editor.widgets import FroalaEditor
 
 
-class PostCreateForm(forms.Form):
+class PostCreateUpdateForm(forms.Form):
     title = forms.CharField(max_length=500, widget=forms.TextInput(attrs={'placeholder':'Title', 'class':'form-control'}))
     # image = forms.ImageField()
     description = forms.CharField(widget=forms.Textarea(attrs={'placeholder':'Description', 'class':'form-control'}))

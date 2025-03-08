@@ -27,7 +27,7 @@ class Relation(models.Model):
 
 
 class Music(models.Model):
-    auther = models.ForeignKey(User, on_delete=models.CASCADE, related_name='musics')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='musics')
     singer_name = models.CharField(max_length=100)
     music_name = models.CharField(max_length=100)
     music_file = models.FileField(upload_to='users/musics/', validators=[FileExtensionValidator(['mp3', 'wav'])])
@@ -37,14 +37,14 @@ class Music(models.Model):
         ordering = ['?']
 
     def music_delete(self):
-        return reverse('account:user_music_delete', args=[self.auther, self.id])
+        return reverse('account:user_music_delete', args=[self.user, self.id])
 
     def __str__(self):
         return f"{self.singer_name} - {self.music_name}"
 
 
 class Image(models.Model):
-    auther = models.ForeignKey(User, on_delete=models.CASCADE, related_name='images')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='images')
     image_file = models.ImageField(upload_to='users/images/', validators=[FileExtensionValidator(['png', 'jpg', 'jpeg', 'tif', 'tiff', 'bmp'])])
     created = models.DateTimeField(auto_now_add=True)
 
@@ -55,11 +55,11 @@ class Image(models.Model):
         return f"Image id: {self.id}"
 
     def image_delete(self):
-        return reverse('account:user_image_delete', args=[self.auther, self.id])
+        return reverse('account:user_image_delete', args=[self.user, self.id])
 
 
 class Story(models.Model):
-    auther = models.ForeignKey(User, on_delete=models.CASCADE, related_name='stories')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='stories')
     content = models.CharField(max_length=2000)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -67,7 +67,7 @@ class Story(models.Model):
         ordering = ['-created']
 
     def story_delete(self):
-        return reverse('account:user_story_delete', args=[self.auther, self.id])
+        return reverse('account:user_story_delete', args=[self.user, self.id])
 
 
 class Link(models.Model):

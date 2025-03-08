@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+
+{% block title %} {{ user }} - Saved Posts {% endblock %}
+
+{% block content %}
+
+{% if saved_posts %}
+    {% for saved_post in saved_posts %}
+        <div class="user-profile" style="text-align: left;">
+            <h3><span class="text-primary">Title:</span> {{ saved_post.post.title }}</h3>
+            <h4><span class="text-primary">Created by:</span> {{ saved_post.post.auther }}</h4>
+            <h4><span class="text-primary">Created:</span> {{ saved_post.post.created }}</h4>
+            <h4><span class="text-primary">Updated:</span> {{ saved_post.post.updated }}</h4>
+            <p>{{ post.description }}</p>
+            <div id="" style="text-align:center;">
+                <a href="{{ saved_post.post.post_detail }}" class="btn btn-outline-primary w-100">Details</a>
+            </div>
+        </div>
+        <br>
+    {% endfor %}
+{% else %}
+        <h2 class="text-danger" style="text-align: center;">< There are not any saved-posts /></h2>
+{% endif %}
+
+{% endblock %}

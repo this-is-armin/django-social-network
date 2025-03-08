@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-
 {% block title %} {{ post.title }} {% endblock %}
 
 {% block content %}
@@ -11,10 +10,15 @@
     </div>
     <hr>
     <div style="text-align: center;">
-        <h4><span class="text-warning">Made by:</span> <a href="{% url 'account:user_profile' post.auther %}">{{ post.auther }}</a></h4>
+        <h4><span class="text-warning">Created by:</span> <a href="{% url 'account:user_profile' post.user %}">{{ post.user }}</a></h4>
         <h5><span class="text-primary">Created:</span> {{ post.created }}</h5>
         <h5><span class="text-primary">Updated:</span> {{ post.updated }}</h5>
-        <a href="{{ post.post_like }}" class="btn btn-outline-primary w-100 {% if can_like == False %} disabled {% endif %}">Like {{ post.likes.count }}</a>
+        <a href="{{ post.post_like }}" class="btn btn-outline-primary w-25 {% if can_like == False %} disabled {% endif %}">Like {{ post.likes.count }}</a>
+        {% if can_save == True %}
+        <a href="{{ post.post_save }}" class="btn btn-outline-dark w-25">Save</a>
+        {% else %}
+        <a href="{{ post.post_un_save }}" class="btn btn-outline-dark w-25">Un-Save</a>
+        {% endif %}
     </div>
 </div>
 <br>
@@ -29,10 +33,10 @@
 <br>
 {% for comment in comments %}
     <div class="user-profile">
-        <h4><span class="text-danger">Posted by:</span> <a href="{% url 'account:user_profile' comment.auther %}">{{ comment.auther }}</a></h4>
+        <h4><span class="text-danger">Posted by:</span> <a href="{% url 'account:user_profile' comment.user %}">{{ comment.user }}</a></h4>
         <h5>{{ comment.created }}</h5>
         <p>{{ comment.body }}</p>
-        {% if request.user == post.auther %}
+        {% if request.user == post.user %}
         <a href="{{ comment.comment_delete }}" class="btn btn-outline-danger w-100">Delete</a>
         {% endif %}
     </div> <br>
