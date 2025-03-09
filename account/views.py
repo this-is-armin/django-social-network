@@ -8,7 +8,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 
 from .models import Relation, Music, Image, Story, Link
-from .forms import (UserRegisterForm, UserLoginForm, UserUpdateProfileForm, UserMusicCreateForm, UserImageCreateForm, UserSearchForm, UserStoryCreateForm, UserLinkCreateForm)
+from .forms import UserRegisterForm, UserLoginForm, UserUpdateProfileForm, UserMusicCreateForm, UserImageCreateForm, UserSearchForm, UserStoryCreateForm, UserLinkCreateForm
 
 
 page_urls = {

@@ -25,10 +25,10 @@ class UserRegisterForm(forms.Form):
         invalid_chars = ['<','>', '(',')', '[',']', '{','}', ',', '/', '\\', '|', '=', '-', '`', '@', '#', '$', '%', '^', '*', '&', 'username']
         for char in invalid_chars:
             if char in username:
-                raise ValidationError('Your username has invalid char(s)..!')
+                raise ValidationError('The username is invalid')
 
         if user.exists():
-            raise ValidationError('This username already exists!')
+            raise ValidationError('The username already exists')
         return username
 
     def clean(self):
@@ -37,10 +37,10 @@ class UserRegisterForm(forms.Form):
         p2 = cd.get('password2')
 
         if p1 and p2 and p1 != p2:
-            raise ValidationError('Passwords must match!')
+            raise ValidationError('The passwords must match')
         
         if len(p1) < 8 or len(p2) < 8:
-            raise ValidationError('The Length of password(s) must be 8 or more character..!')
+            raise ValidationError('The password length must be 8-characters or more')
     
 
 class UserUpdateProfileForm(forms.ModelForm):
