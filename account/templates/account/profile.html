@@ -38,23 +38,23 @@
 </div>
 <br>
 <div class="user-profile">
-    <h4>Stories: <a href="{% url 'account:user_stories' user %}">{{ stories.count }}</a></h4>
-    <hr>
-    <h4>Posts: <a href="{% url 'account:user_posts' user %}">{{ posts.count }}</a></h4>
-    <hr>
+    <a href="{% url 'account:user_stories' user %}" class="btn btn-outline-primary w-100">Stories {{ stories.count }}</a>
+    <br><br>
+    <a href="{% url 'account:user_posts' user %}" class="btn btn-outline-primary w-100">Posts {{ posts.count }}</a>
+    <br><br>
     {% if request.user == user %}
-    <h4>Saved Posts: <a href="{% url 'account:user_saved_posts' user %}">{{ saved_posts.count }}</a></h4>
-    <hr>
+    <a href="{% url 'account:user_saved_posts' user %}" class="btn btn-outline-primary w-100">Saved Posts {{ saved_posts.count }}</a>
+    <br><br>
     {% endif %}
-    <h4>Links: <a href="{% url 'account:user_links' user %}">{{ links.count }}</a></h4>
-    <hr>
-    <h4>Musics: <a href="{% url 'account:user_musics' user %}">{{ musics.count }}</a></h4>
-    <hr>
-    <h4>Images: <a href="{% url 'account:user_images' user %}">{{ images.count }}</a></h4>
-    <hr>
-    <h4>Followers: <a href="{% url 'account:user_followers' user %}">{{ user.followers.count }}</a></h4>
-    <hr>
-    <h4>Followings: <a href="{% url 'account:user_followings' user %}">{{ user.followings.count }}</a></h4>
+    <a href="{% url 'account:user_links' user %}" class="btn btn-outline-primary w-100">Links {{ links.count }}</a>
+    <br><br>
+    <a href="{% url 'account:user_musics' user %}" class="btn btn-outline-primary w-100">Musics {{ musics.count }}</a>
+    <br><br>
+    <a href="{% url 'account:user_images' user %}" class="btn btn-outline-primary w-100">Images {{ images.count }}</a>
+    <br><br>
+    <a href="{% url 'account:user_followers' user %}" class="btn btn-outline-primary w-100">Followers {{ user.followers.count }}</a>
+    <br><br>
+    <a href="{% url 'account:user_followings' user %}" class="btn btn-outline-primary w-100">Followings {{ user.followings.count }}</a>
 </div>
 
 {% endblock %}
