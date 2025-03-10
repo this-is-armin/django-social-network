@@ -279,11 +279,12 @@ class UserMusicCreateView(View):
         if request.user != self.user_instance: return redirect('account:user_profile', self.user_instance)
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request):
+    def get(self, request, **kwargs):
+        user = self.user_instance
         form = self.form_class()
-        return render(request, self.template_name, {'form':form})
+        return render(request, self.template_name, {'form':form, 'user':user})
 
-    def post(self, request):
+    def post(self, request, **kwargs):
         form = self.form_class(request.POST, request.FILES)
 
         if form.is_valid():
@@ -325,11 +326,12 @@ class UserImageCreateView(View):
         if request.user != self.user_instance: return redirect('account:user_profile', self.user_instance)
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request):
+    def get(self, request, **kwargs):
+        user = self.user_instance
         form = self.form_class()
-        return render(request, self.template_name, {'form':form})
+        return render(request, self.template_name, {'form':form, 'user':user})
 
-    def post(self, request):
+    def post(self, request, **kwargs):
         form = self.form_class(request.POST, request.FILES)
 
         if form.is_valid():

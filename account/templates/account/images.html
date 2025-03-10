@@ -8,7 +8,7 @@
 {% for image in images %}
     <div class="user-profile">
         <img src="/media/{{ image.image_file }}" class="w-100" style="border-radius:5px;">
-        {% if request.user == image.auther %}
+        {% if request.user == image.user %}
           <br><br><a href="{{ image.image_delete }}" class="btn btn-outline-danger w-100">Delete</a>
         {% endif %}
     </div>

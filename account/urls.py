@@ -25,11 +25,11 @@ urlpatterns = [
     path('<username>/followings/', views.user_followings_view, name='user_followings'),
 
     path('<username>/create-music/', views.UserMusicCreateView.as_view(), name='user_create_music'),
-    path('<str:username>/musics/<pk>/delete/', views.user_music_delete_view, name='user_music_delete'),
+    path('<username>/musics/<pk>/delete/', views.user_music_delete_view, name='user_music_delete'),
     path('<username>/musics/', views.user_musics_view, name='user_musics'),
 
     path('<username>/create-image/', views.UserImageCreateView.as_view(), name='user_create_image'),
-    path('<str:username>/images/<pk>/delete/', views.user_image_delete_view, name='user_image_delete'),
+    path('<username>/images/<pk>/delete/', views.user_image_delete_view, name='user_image_delete'),
     path('<username>/images/', views.user_images_view, name='user_images'),
 
     path('<username>/create-story/', views.UserStoryCreateView.as_view(), name='user_create_story'),
