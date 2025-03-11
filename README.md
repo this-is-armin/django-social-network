@@ -1,5 +1,3 @@
-![](https://badgen.net/badge/Editor.js/v2.0/blue)
-
 ## This is a social network created with Python3 and Django Framework.
 
 ### _Features_:
@@ -27,7 +25,7 @@
 
 ## _Installing_:
 
-Go to the project path in the terminal and run the following commands:
+go to the project path in the terminal and run the following command:
 
 ```shell
 pip install -r requirements.txt
