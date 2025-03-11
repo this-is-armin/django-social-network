@@ -22,23 +22,19 @@
      - Post-Delete
      - Post-Like
      - Adding comments
+<hr>
 
-## _Installing_:
-
-go to the project path in the terminal and run the following command:
-
+# Installing:
+### Run the following command:
 ```shell
 pip install -r requirements.txt
-
-python manage.py makemigrations account base
 
 python manage.py migrate
 
 python manage.py runserver
 ```
 
-### Open the browser and go to this address:
-
+### Open browser and go to this address:
 ```shell
 localhost:8000
 ```
