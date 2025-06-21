@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Explore {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'explore/css/explore.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% if posts %}
+<h2 class="title">Explore</h2>
+
+<br>
+<br>
+
+<form action="" method="get" class="search-form">
+    <input type="text" name="search" id="search" placeholder="Search in posts" required>
+    <input type="submit" value="Search">
+</form>
+
+<br><br>
+
+<div class="container">
+    {% for post in page_obj %}
+    <div class="card">
+        <p>{{ post.description }}</p>
+        <br><hr><br>
+        <div class="actions">
+            <a href="{% url 'accounts:profile' post.user.username %}" class="action">By: {{ post.user.username }}</a>
+            <a href="{{ post.get_absolute_url }}" class="action">Read More</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% include 'includes/pagination.html' %}
+
+{% else %}
+<div class="no-posts">There are no posts at the moment</div>
+{% endif %}
+
+{% endblock %}

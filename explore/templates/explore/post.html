@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} {{ post.title }} {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'explore/css/post.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="timeContainer">
+    <h3>
+        Created at: <span class="time">{{ post.created_at }}</span>
+    </h3>
+    <br>
+    <h3>
+        By: <a href="{% url 'accounts:profile' post.user.username %}">{{ post.user.username }}</a>
+    </h3>
+</div>
+
+<hr><br>
+
+{{ post.body|safe }}
+
+<br><hr><br>
+
+<form action="" method="post" class="comment-form">
+    {% csrf_token %}
+    <textarea name="body" id="body" rows="10" cols="30" placeholder="Your comment" required></textarea>
+    <input type="submit" value="Send">
+</form>
+
+{% if comments %}
+<br>
+<div class="container">
+    {% for comment in comments %}
+    <div class="comment">
+        <h3>
+            By: <a href="{% url 'accounts:profile' comment.user.username %}">{{ comment.user }}</a>
+        </h3>
+        <h3>
+            At: <span class="">{{ comment.created_at }}</span>
+        </h3>
+        <br><hr><br>
+        <p>{{ comment.body }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<br><hr><br>
+
+<h4 class="center"><i>{{ post.user.email }}</i></h4>
+
+{% endblock %}

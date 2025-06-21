@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Followers {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'accounts/css/followers.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% if followers %}
+<div class="container">
+    {% for follower in followers %}
+    <a href="{% url 'accounts:profile' follower.from_user.username %}" class="card">
+        {{ follower.from_user.username }}
+    </a>
+    {% endfor %}
+</div>
+
+{% include 'includes/pagination.html' %}
+
+{% else %}
+<div class="no-followers">There are no followers at the moment</div>
+{% endif %}
+
+{% endblock %}

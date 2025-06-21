@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Edit Post {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'explore/css/edit-post.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <h1>Edit Post</h1>
+    
+    <br><br>
+
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.media }}
+        {{ form.as_p }}
+        <input type="submit" value="Edit Post">
+    </form>
+</div>
+
+{% endblock %}

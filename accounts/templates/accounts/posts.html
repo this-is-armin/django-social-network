@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Posts {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'accounts/css/posts.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% if posts %}
+<div class="container">
+    {% for post in page_obj %}
+    <div class="card">
+        <p>{{ post.description }}</p>
+        <br><hr><br>
+        <div class="actions">
+            <a href="{{ post.get_absolute_url }}" class="action">Read More</a>
+            {% if request.user == post.user %}
+            <a href="{{ post.delete_post }}" class="action">Delete</a>
+            <a href="{{ post.edit_post }}" class="action">Edit</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% include 'includes/pagination.html' %}
+
+{% else %}
+<div class="no-posts">There are no posts at the moment</div>
+{% endif %}
+
+{% endblock %}

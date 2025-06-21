@@ -1,0 +1,46 @@
+.container {
+    text-align: center;
+}
+
+form {
+    width: 100%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-size: 1.5rem;
+}
+
+form input {
+    width: 70%;
+    padding: 10px;
+    font-size: 1.2rem;
+    border: 1px solid black;
+    border-radius: 3px;
+}
+
+form input[type='submit'] {
+    width: fit-content;
+    margin: auto;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+form input[type='submit']:hover {
+    background-color: darkgray;
+}
+
+form ul {
+    margin: auto;
+}
+
+@media (max-width: 768px) {
+    .container {
+        font-size: 0.8rem;
+    }
+
+    form input {
+        width: 100%;
+        font-size: 1rem;
+    }
+}

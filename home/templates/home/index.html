@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Home {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'home/css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <h1>Django Social Network</h1>
+    <p><i>This is a <strong>social network</strong> has been created with <strong>Python</strong> and <strong>Django</strong></i></p>
+</div>
+
+{% endblock %}

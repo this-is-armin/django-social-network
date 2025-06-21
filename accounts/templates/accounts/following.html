@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Following {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'accounts/css/following.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% if following %}
+<div class="container">
+    {% for f in following %}
+    <a href="{% url 'accounts:profile' f.to_user.username %}" class="card">
+        {{ f.to_user.username }}
+    </a>
+    {% endfor %}
+</div>
+
+{% include 'includes/pagination.html' %}
+
+{% else %}
+<div class="no-following">There are no following at the moment</div>
+{% endif %}
+
+{% endblock %}

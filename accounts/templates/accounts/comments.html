@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Comments {% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'accounts/css/comments.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% if comments %}
+<div class="container">
+    {% for comment in page_obj %}
+    <div class="card">
+        <p>{{ comment.body }}</p>
+        <br><hr><br>
+        <div class="actions">
+            <a href="{{ comment.delete_comment }}" class="action">Delete</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% include 'includes/pagination.html' %}
+
+{% else %}
+<div class="no-comments">There are no comments at the moment</div>
+{% endif %}
+
+{% endblock %}
