@@ -49,6 +49,11 @@
         font-size: 0.9rem;
     }
 
+    .info img {
+        width: 180px;
+        height: 180px;
+    }
+
     .info h1,
     .info h3 {
         border-bottom: 2px solid black;

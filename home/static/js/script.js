@@ -4,5 +4,5 @@ function messagesHider() {
     message.style.display = 'none';
 }
 
-const interval = setInterval(messagesHider, 10000);
+const interval = setInterval(messagesHider, 5000);
 // End

@@ -153,10 +153,8 @@ class UserEditView(View):
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'age': user.age,
             'bio': user.bio,
-            'location': user.location,
-            'image': user.image,
+            # 'image': user.image,
         }
         form = self.form_class(initial=INITIAL)
         context = {
@@ -165,7 +163,7 @@ class UserEditView(View):
         return render(request, self.template_name, context)
     
     def post(self, request, **kwargs):
-        form = self.form_class(request.POST, request.FILES)
+        form = self.form_class(request.POST) # form = self.form_class(request.POST, request.FILES) if you are working with file 
         old_user = self.user_instance
 
         if form.is_valid():
@@ -175,10 +173,8 @@ class UserEditView(View):
                 old_user.email = cd['email']
                 old_user.first_name = cd['first_name']
                 old_user.last_name = cd['last_name']
-                old_user.age = cd['age']
                 old_user.bio = cd['bio']
-                old_user.location = cd['location']
-                old_user.image = cd['image']
+                # old_user.image = cd['image']
                 old_user.save()
                 messages.success(request, 'Successfully edited account')
                 return redirect('accounts:profile', old_user.username)
@@ -193,10 +189,8 @@ class UserEditView(View):
                     old_user.email = cd['email']
                     old_user.first_name = cd['first_name']
                     old_user.last_name = cd['last_name']
-                    old_user.age = cd['age']
                     old_user.bio = cd['bio']
-                    old_user.location = cd['location']
-                    old_user.image = cd['image']
+                    # old_user.image = cd['image']
                     old_user.save()
                     messages.success(request, 'Successfully edited account')
                     return redirect('accounts:profile', old_user.username)

@@ -1,6 +1,5 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.core.exceptions import ValidationError
-from django.core.validators import FileExtensionValidator
 from django import forms
 
 from .models import CustomUser
@@ -9,7 +8,7 @@ from .models import CustomUser
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = UserCreationForm.Meta.fields + ('age', 'bio', 'location', 'image',)
+        fields = UserCreationForm.Meta.fields + ('bio',)
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -72,6 +71,37 @@ class UserSignUpForm(forms.Form):
             raise ValidationError('Password must be 8 or longer characters')
 
 
+        invalid_chars = ['(', ')', '[', ']', '{', '}', '<', '>', '/', '\\', '|', ',', '~', '`', '!', '?', '@', '#', '$', '%', '^', '&', '*', '-', '+', '=', ' ']
+        invalid_names = ['admin', 'ADMIN']
+
+        first_name = self.cleaned_data.get('first_name')
+        last_name = self.cleaned_data.get('last_name')
+        
+        # To validate first-name
+        for char in invalid_chars:
+            if char in first_name:
+                raise ValidationError('Your firstName was contain incorrect character(s) or space')
+
+        for name in invalid_names:
+            if name == first_name:
+                raise ValidationError(f"Your firstName can't be '{name}'")
+            
+            if name in first_name:
+                raise ValidationError(f"Your firstName can't contain '{name}'")
+        
+        # To validate last-name
+        for char in invalid_chars:
+            if char in last_name:
+                raise ValidationError('Your lastName was contain incorrect character(s) or space')
+
+        for name in invalid_names:
+            if name == last_name:
+                raise ValidationError(f"Your lastName can't be '{name}'")
+            
+            if name in last_name:
+                raise ValidationError(f"Your lastName can't contain '{name}'")
+
+
 class UserSignInForm(forms.Form):
     username = forms.CharField(label='', max_length=200, widget=forms.TextInput(attrs={
         'placeholder': 'Your username',
@@ -94,16 +124,10 @@ class UserEditForm(forms.Form):
     last_name = forms.CharField(label='', max_length=50, widget=forms.TextInput(attrs={
         'placeholder': 'Your lastName',
     }))
-    age = forms.IntegerField(label='', required=False, widget=forms.NumberInput(attrs={
-        'placeholder': 'Your age',
-    }))
     bio = forms.CharField(label='', max_length=150, required=False, widget=forms.Textarea(attrs={
         'placeholder': 'Your bio',
     }))
-    location = forms.CharField(label='', max_length=100, required=False, widget=forms.TextInput(attrs={
-        'placeholder': 'Your location',
-    }))
-    image = forms.ImageField(label='', required=False, validators=[FileExtensionValidator(['png', 'jpg', 'jpeg'])])
+    # image = forms.ImageField(label='', required=False)
     
 
     def clean_username(self):

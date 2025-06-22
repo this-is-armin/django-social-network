@@ -12,18 +12,10 @@
 
 <div class="container">
     <div class="info">
-        {% if user.image %}
-        <img src="{{ user.image.url }}" alt="Profile Picture">
-        {% endif %}
+        <img src="{% static 'accounts/images/default-pic.png' %}" alt="Profile Picture">
         <h1>{{ user.first_name }} {{ user.last_name }}</h1>
         <h3>@{{ user.username }}</h3>
         <h3>{{ user.email }}</h3>
-        {% if user.age %}
-        <h3>Age: {{ user.age }}</h3>
-        {% endif %}
-        {% if user.location %}
-        <h3>{{ user.location }}</h3>
-        {% endif %}
         {% if user.bio %}
         <h3>{{ user.bio }}</h3>
         {% endif %}

@@ -4,10 +4,8 @@ from django.urls import reverse
 
 
 class CustomUser(AbstractUser):
-    age = models.PositiveIntegerField(null=True, blank=True)
     bio = models.CharField(max_length=150, null=True, blank=True)
-    location = models.CharField(max_length=100, null=True, blank=True)
-    image = models.ImageField(upload_to='accounts/images/', null=True, blank=True)
+    # image = models.ImageField(upload_to='accounts/images/', null=True, blank=True)
 
     @property
     def delete_account(self):
