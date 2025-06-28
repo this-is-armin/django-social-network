@@ -98,9 +98,8 @@ class UserProfileView(View):
     
     def get(self, request, **kwargs):
         user = get_object_or_404(CustomUser, username=kwargs['username'])
-        relation = Relation.objects.filter(from_user=request.user, to_user=user)
 
-        if relation.exists():
+        if Relation.objects.filter(from_user=request.user, to_user=user).exists():
             is_followed = True
         else:
             is_followed = False
@@ -214,9 +213,8 @@ class UserFollowView(View):
     
     def get(self, request, **kwargs):
         user = self.user_instance
-        relation = Relation.objects.filter(from_user=request.user, to_user=user)
 
-        if not relation.exists():
+        if not Relation.objects.filter(from_user=request.user, to_user=user).exists():
             Relation.objects.create(from_user=request.user, to_user=user)
             messages.success(request, f"Successfully followed '{user.username}'")
         return redirect('accounts:profile', user.username)
@@ -236,9 +234,8 @@ class UserUnfollowView(View):
     
     def get(self, request, **kwargs):
         user = self.user_instance
-        relation = Relation.objects.filter(from_user=request.user, to_user=user)
 
-        if relation.exists():
+        if Relation.objects.filter(from_user=request.user, to_user=user).exists():
             Relation.objects.get(from_user=request.user, to_user=user).delete()
             messages.success(request, f"Successfully unfollowed '{user.username}'")
         return redirect('accounts:profile', user.username)
@@ -327,6 +324,62 @@ class UserCommentsView(View):
 
         context = {
             'comments': comments,
+            'page_obj': page_obj,
+        }
+        return render(request, self.template_name, context)
+
+
+class UserSavedPostsView(View):
+    template_name = 'accounts/saved-posts.html'
+
+    def setup(self, request, *args, **kwargs):
+        self.user_instance = get_object_or_404(CustomUser, username=kwargs['username'])
+        return super().setup(request, *args, **kwargs)
+    
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('home:home')
+        if request.user != self.user_instance:
+            return redirect('accounts:profile', self.user_instance)
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request, **kwargs):
+        saved_posts = self.user_instance.saved_posts.all()
+
+        paginator = Paginator(saved_posts, 50)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context = {
+            'posts': saved_posts,
+            'page_obj': page_obj,
+        }
+        return render(request, self.template_name, context)
+
+
+class UserLikedPostsView(View):
+    template_name = 'accounts/liked-posts.html'
+
+    def setup(self, request, *args, **kwargs):
+        self.user_instance = get_object_or_404(CustomUser, username=kwargs['username'])
+        return super().setup(request, *args, **kwargs)
+    
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('home:home')
+        if request.user != self.user_instance:
+            return redirect('accounts:profile', self.user_instance)
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request, **kwargs):
+        liked_posts = self.user_instance.liked_posts.all()
+
+        paginator = Paginator(liked_posts, 50)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context = {
+            'posts': liked_posts,
             'page_obj': page_obj,
         }
         return render(request, self.template_name, context)

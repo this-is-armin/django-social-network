@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 
 from .forms import NewPostForm
-from .models import Post, Comment
+from .models import Post, Comment, PostSave, PostLike
 
 
 class ExploreView(View):
@@ -46,9 +46,22 @@ class PostView(View):
     def get(self, request, **kwargs):
         post = self.post_instance
         comments = post.comments.all()
+
+        if PostSave.objects.filter(post=post, user=request.user).exists():
+            is_saved = True
+        else:
+            is_saved = False
+        
+        if PostLike.objects.filter(post=post, user=request.user).exists():
+            is_liked = True
+        else:
+            is_liked = False
+
         context = {
             'post': post,
             'comments': comments,
+            'is_saved': is_saved,
+            'is_liked': is_liked,
         }
         return render(request, self.template_name, context)
     
@@ -130,8 +143,8 @@ class NewPostView(View):
         return render(request, self.template_name, context)
 
 
-class EditPostView(View):
-    template_name = 'explore/edit-post.html'
+class PostEditView(View):
+    template_name = 'explore/post-edit.html'
     form_class = NewPostForm
 
     def setup(self, request, *args, **kwargs):
@@ -167,3 +180,63 @@ class EditPostView(View):
             'form': form,
         }
         return render(request, self.template_name, context)
+
+
+class PostSaveView(View):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('home:home')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request, **kwargs):
+        post = get_object_or_404(Post, pk=kwargs['pk'])
+
+        if not PostSave.objects.filter(post=post, user=request.user).exists():
+            PostSave.objects.create(post=post, user=request.user)
+            messages.success(request, 'Successfully saved post')
+        return redirect(post.get_absolute_url)
+
+
+class PostUnSaveView(View):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('home:home')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request, **kwargs):
+        post = get_object_or_404(Post, pk=kwargs['pk'])
+
+        if PostSave.objects.filter(post=post, user=request.user).exists():
+            PostSave.objects.get(post=post, user=request.user).delete()
+            messages.success(request, 'Successfully unsaved post')
+        return redirect(post.get_absolute_url)
+
+
+class PostLikeView(View):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('home:home')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request, **kwargs):
+        post = get_object_or_404(Post, pk=kwargs['pk'])
+
+        if not PostLike.objects.filter(post=post, user=request.user).exists():
+            PostLike.objects.create(post=post, user=request.user)
+            messages.success(request, 'Successfully liked post')
+        return redirect(post.get_absolute_url)
+
+
+class PostUnLikeView(View):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('home:home')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request, **kwargs):
+        post = get_object_or_404(Post, pk=kwargs['pk'])
+
+        if PostLike.objects.filter(post=post, user=request.user).exists():
+            PostLike.objects.get(post=post, user=request.user).delete()
+            messages.success(request, 'Successfully unliked post')
+        return redirect(post.get_absolute_url)

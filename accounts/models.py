@@ -43,25 +43,41 @@ class CustomUser(AbstractUser):
     def following_page(self):
         return reverse('accounts:following', args=[self.username])
     
-    property
+    @property
     def posts_count(self):
         return self.posts.count()
     
-    property
+    @property
     def posts_page(self):
         return reverse('accounts:posts', args=[self.username])
 
-    property
+    @property
     def comments_count(self):
         return self.comments.count()
     
-    property
+    @property
     def comments_page(self):
         return reverse('accounts:comments', args=[self.username])
     
-    property
+    @property
     def new_post(self):
         return reverse('explore:new-post')
+    
+    @property
+    def saved_posts_count(self):
+        return self.saved_posts.count()
+    
+    @property
+    def saved_posts_page(self):
+        return reverse('accounts:saved-posts', args=[self.username])
+    
+    @property
+    def liked_posts_count(self):
+        return self.liked_posts.count()
+    
+    @property
+    def liked_posts_page(self):
+        return reverse('accounts:liked-posts', args=[self.username])
 
 
 class Relation(models.Model):

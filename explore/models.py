@@ -24,13 +24,29 @@ class Post(models.Model):
         return reverse('explore:post', args=[self.pk])
     
     @property
-    def delete_post(self):
-        return reverse('explore:delete-post', args=[self.pk])
+    def post_delete(self):
+        return reverse('explore:post-delete', args=[self.pk])
     
     @property
-    def edit_post(self):
-        return reverse('explore:edit-post', args=[self.pk])
+    def post_edit(self):
+        return reverse('explore:post-edit', args=[self.pk])
     
+    @property
+    def post_save(self):
+        return reverse('explore:post-save', args=[self.pk])
+    
+    @property
+    def post_unsave(self):
+        return reverse('explore:post-unsave', args=[self.pk])
+    
+    @property
+    def post_like(self):
+        return reverse('explore:post-like', args=[self.pk])
+    
+    @property
+    def post_unlike(self):
+        return reverse('explore:post-unlike', args=[self.pk])
+  
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
@@ -45,5 +61,29 @@ class Comment(models.Model):
         return self.body
     
     @property
-    def delete_comment(self):
-        return reverse('explore:delete-comment', args=[self.pk])
+    def comment_delete(self):
+        return reverse('explore:comment-delete', args=[self.pk])
+
+
+class PostSave(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='saves')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='saved_posts')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.post.title
+
+
+class PostLike(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='liked_posts')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.post.title

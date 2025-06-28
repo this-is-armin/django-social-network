@@ -34,7 +34,9 @@
         {% endif %}
         <a href="{{ user.posts_page }}" class="action">Posts {{ user.posts_count }}</a>
         {% if request.user == user %}
+        <a href="{{ user.saved_posts_page }}" class="action">Saved Posts {{ user.saved_posts_count }}</a>
         <a href="{{ user.comments_page }}" class="action">Comments {{ user.comments_count }}</a>
+        <a href="{{ user.liked_posts_page }}" class="action">Liked Posts {{ user.liked_posts_count }}</a>
         {% endif %}
         <a href="{{ user.followers_page }}" class="action">Followers {{ user.followers_count }}</a>
         <a href="{{ user.following_page }}" class="action">Following {{ user.following_count }}</a>
