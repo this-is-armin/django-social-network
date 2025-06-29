@@ -46,6 +46,10 @@ class Post(models.Model):
     @property
     def post_unlike(self):
         return reverse('explore:post-unlike', args=[self.pk])
+    
+    @property
+    def post_likes_count(self):
+        return self.likes.count()
   
 
 class Comment(models.Model):

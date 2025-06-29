@@ -21,17 +21,17 @@
     <br>
     <h3>
         {% if is_saved == False %}
-        <a href="{{ post.post_save }}">Save This Post</a>
+        <a href="{{ post.post_save }}" class="button">Save This Post</a>
         {% else %}
-        <a href="{{ post.post_unsave }}">Unsave This Post</a>
+        <a href="{{ post.post_unsave }}" class="button">Unsave This Post</a>
         {% endif %}
     </h3>
     <br>
     <h3>
         {% if is_liked == False %}
-        <a href="{{ post.post_like }}">Like This Post</a>
+        <a href="{{ post.post_like }}" class="button">Like This Post [{{ post.post_likes_count }}]</a>
         {% else %}
-        <a href="{{ post.post_unlike }}">Unlike This Post</a>
+        <a href="{{ post.post_unlike }}" class="button">Unlike This Post [{{ post.post_likes_count }}]</a>
         {% endif %}
     </h3>
 </div>
