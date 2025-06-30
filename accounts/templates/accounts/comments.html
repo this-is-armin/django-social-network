@@ -10,21 +10,18 @@
 
 {% block content %}
 
-{% if comments %}
+{% if comments_list %}
 <div class="container">
-    {% for comment in page_obj %}
+    {% for comment in comments_list %}
     <div class="card">
         <p>{{ comment.body }}</p>
         <br><hr><br>
         <div class="actions">
-            <a href="{{ comment.delete_comment }}" class="action">Delete</a>
+            <a href="{{ comment.get_delete_url }}" class="action">Delete</a>
         </div>
     </div>
     {% endfor %}
 </div>
-
-{% include 'includes/pagination.html' %}
-
 {% else %}
 <div class="no-comments">There are no comments at the moment</div>
 {% endif %}

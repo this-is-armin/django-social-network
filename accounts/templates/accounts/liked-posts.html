@@ -10,22 +10,19 @@
 
 {% block content %}
 
-{% if posts %}
+{% if liked_posts_list %}
 <div class="container">
-    {% for post in page_obj %}
+    {% for post in liked_posts_list %}
     <div class="card">
         <p>{{ post.post.description }}</p>
         <br><hr><br>
         <div class="actions">
             <a href="{{ post.post.get_absolute_url }}" class="action">Read More</a>
-            <a href="{{ post.post.post_unlike }}" class="action">Remove</a>
+            <a href="{{ post.post.get_unlike_url }}" class="action">Remove</a>
         </div>
     </div>
     {% endfor %}
 </div>
-
-{% include 'includes/pagination.html' %}
-
 {% else %}
 <div class="no-posts">There are no liked posts at the moment</div>
 {% endif %}

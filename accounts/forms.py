@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.core.exceptions import ValidationError
 from django import forms
+from django.core.validators import FileExtensionValidator
 
 from .models import CustomUser
 
@@ -8,13 +9,35 @@ from .models import CustomUser
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = UserCreationForm.Meta.fields + ('bio',)
+        fields = UserCreationForm.Meta.fields + ('bio', 'image',)
 
 
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
         fields = UserChangeForm.Meta.fields
+
+
+def validate_name_field(value, field_name):
+    """To validate name fields (username, first_name, last_name)"""
+    INVALID_CHARS = ['(', ')', '[', ']', '{', '}', '<', '>', '/', '\\', '|', ',', '~', '`', '!', '?', '@', '#', '$', '%', '^', '&', '*', '-', '+', '=', ' ']
+    INVALID_NAMES = ['admin', 'ADMIN']
+
+    if not value:
+        return value
+    
+    for char in INVALID_CHARS:        
+        if char in value:
+            raise ValidationError(f'Your {field_name} contains invalid character(s) or space')
+    
+    for name in INVALID_NAMES:
+        if name == value:
+            raise ValidationError(f"Your {field_name} can't be '{name}'")
+        
+        if name in value:
+            raise ValidationError(f"Your {field_name} can't contain '{name}'")
+    
+    return value
 
 
 class UserSignUpForm(forms.Form):
@@ -39,26 +62,20 @@ class UserSignUpForm(forms.Form):
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        user = CustomUser.objects.filter(username=username)
+        validate_name_field(username, 'username')
 
-        invalid_chars = ['(', ')', '[', ']', '{', '}', '<', '>', '/', '\\', '|', ',', '~', '`', '!', '?', '@', '#', '$', '%', '^', '&', '*', '-', '+', '=', ' ']
-        invalid_names = ['admin', 'ADMIN']
-        
-        for char in invalid_chars:
-            if char in username:
-                raise ValidationError('Your username was contain incorrect character(s)')
-
-        for name in invalid_names:
-            if name == username:
-                raise ValidationError(f"Your username can't be '{name}'")
-            
-            if name in username:
-                raise ValidationError(f"Your username can't contain '{name}'")
-
-        if user.exists():
+        if CustomUser.objects.filter(username=username).exists():
             raise ValidationError('This username already exists')
         
         return username
+    
+    def clean_first_name(self):
+        first_name = str(self.cleaned_data.get('first_name'))
+        return validate_name_field(first_name, 'firstName')
+    
+    def clean_last_name(self):
+        last_name = str(self.cleaned_data.get('last_name'))
+        return validate_name_field(last_name, 'lastName')
     
     def clean(self):
         password = self.cleaned_data.get('password')
@@ -69,37 +86,6 @@ class UserSignUpForm(forms.Form):
         
         if len(password) < 8 or len(confirm_password) < 8:
             raise ValidationError('Password must be 8 or longer characters')
-
-
-        invalid_chars = ['(', ')', '[', ']', '{', '}', '<', '>', '/', '\\', '|', ',', '~', '`', '!', '?', '@', '#', '$', '%', '^', '&', '*', '-', '+', '=', ' ']
-        invalid_names = ['admin', 'ADMIN']
-
-        first_name = self.cleaned_data.get('first_name')
-        last_name = self.cleaned_data.get('last_name')
-        
-        # To validate first-name
-        for char in invalid_chars:
-            if char in first_name:
-                raise ValidationError('Your firstName was contain incorrect character(s) or space')
-
-        for name in invalid_names:
-            if name == first_name:
-                raise ValidationError(f"Your firstName can't be '{name}'")
-            
-            if name in first_name:
-                raise ValidationError(f"Your firstName can't contain '{name}'")
-        
-        # To validate last-name
-        for char in invalid_chars:
-            if char in last_name:
-                raise ValidationError('Your lastName was contain incorrect character(s) or space')
-
-        for name in invalid_names:
-            if name == last_name:
-                raise ValidationError(f"Your lastName can't be '{name}'")
-            
-            if name in last_name:
-                raise ValidationError(f"Your lastName can't contain '{name}'")
 
 
 class UserSignInForm(forms.Form):
@@ -127,55 +113,18 @@ class UserEditForm(forms.Form):
     bio = forms.CharField(label='', max_length=150, required=False, widget=forms.Textarea(attrs={
         'placeholder': 'Your bio',
     }))
-    # image = forms.ImageField(label='', required=False)
-    
+    image = forms.ImageField(label='', required=False, validators=[FileExtensionValidator(allowed_extensions=['png', 'jpeg', 'jpg', 'gif'])], widget=forms.FileInput(attrs={
+        'class': 'file-input',
+    }))
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
-
-        invalid_chars = ['(', ')', '[', ']', '{', '}', '<', '>', '/', '\\', '|', ',', '~', '`', '!', '?', '@', '#', '$', '%', '^', '&', '*', '-', '+', '=', ' ']
-        invalid_names = ['admin', 'ADMIN']
-        
-        for char in invalid_chars:
-            if char in username:
-                raise ValidationError('Your username was contain incorrect character(s)')
-
-        for name in invalid_names:
-            if name == username:
-                raise ValidationError(f"Your username can't be '{name}'")
-            
-            if name in username:
-                raise ValidationError(f"Your username can't contain '{name}'")
-            
-        return username
+        return validate_name_field(username, 'username')
     
-    def clean(self):
+    def clean_first_name(self):
         first_name = str(self.cleaned_data.get('first_name'))
+        return validate_name_field(first_name, 'firstName')
+    
+    def clean_last_name(self):
         last_name = str(self.cleaned_data.get('last_name'))
-
-        invalid_chars = ['(', ')', '[', ']', '{', '}', '<', '>', '/', '\\', '|', ',', '~', '`', '!', '?', '@', '#', '$', '%', '^', '&', '*', '-', '+', '=', ' ']
-        invalid_names = ['admin', 'ADMIN']
-        
-        # To validate first-name
-        for char in invalid_chars:
-            if char in first_name:
-                raise ValidationError('Your firstName was contain incorrect character(s) or space')
-
-        for name in invalid_names:
-            if name == first_name:
-                raise ValidationError(f"Your firstName can't be '{name}'")
-            
-            if name in first_name:
-                raise ValidationError(f"Your firstName can't contain '{name}'")
-        
-        # To validate last-name
-        for char in invalid_chars:
-            if char in last_name:
-                raise ValidationError('Your lastName was contain incorrect character(s) or space')
-
-        for name in invalid_names:
-            if name == last_name:
-                raise ValidationError(f"Your lastName can't be '{name}'")
-            
-            if name in last_name:
-                raise ValidationError(f"Your lastName can't contain '{name}'")
+        return validate_name_field(last_name, 'lastName')

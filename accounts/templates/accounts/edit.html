@@ -18,6 +18,12 @@
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
+        {% if user.image %}
+        <p>
+            Do you wanna delete your profile picture?
+            <input type="checkbox" name="delete_profile_picture">
+        </p>
+        {% endif %}
         <input type="submit" value="Edit Account">
     </form>
 </div>

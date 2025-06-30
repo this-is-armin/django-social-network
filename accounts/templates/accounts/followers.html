@@ -10,17 +10,14 @@
 
 {% block content %}
 
-{% if followers %}
+{% if followers_list %}
 <div class="container">
-    {% for follower in followers %}
-    <a href="{% url 'accounts:profile' follower.from_user.username %}" class="card">
+    {% for follower in followers_list %}
+    <a href="{{ follower.from_user.get_profile_url }}" class="card">
         {{ follower.from_user.username }}
     </a>
     {% endfor %}
 </div>
-
-{% include 'includes/pagination.html' %}
-
 {% else %}
 <div class="no-followers">There are no followers at the moment</div>
 {% endif %}

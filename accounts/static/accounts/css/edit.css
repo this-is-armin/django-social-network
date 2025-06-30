@@ -35,6 +35,11 @@ form ul {
     margin: auto;
 }
 
+/*.file-input {
+    display: block;
+    margin: 10px 0;
+}*/
+
 @media (max-width: 768px) {
     .container {
         font-size: 0.8rem;

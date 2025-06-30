@@ -10,7 +10,7 @@
 
 {% block content %}
 
-{% if posts %}
+{% if page_obj %}
 <h2 class="title">Explore</h2>
 
 <br>
@@ -29,7 +29,7 @@
         <p>{{ post.description }}</p>
         <br><hr><br>
         <div class="actions">
-            <a href="{% url 'accounts:profile' post.user.username %}" class="action">By: {{ post.user.username }}</a>
+            <a href="{{ post.user.get_profile_url }}" class="action">By: {{ post.user.username }}</a>
             <a href="{{ post.get_absolute_url }}" class="action">Read More</a>
         </div>
     </div>

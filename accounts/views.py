@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.views import View
-from django.core.paginator import Paginator
 
 from .models import CustomUser, Relation
 from .forms import UserSignUpForm, UserSignInForm, UserEditForm
@@ -14,7 +13,7 @@ class UserSignUpView(View):
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request):
@@ -47,7 +46,7 @@ class UserSignInView(View):
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request):
@@ -79,7 +78,7 @@ class UserSignInView(View):
 class UserSignOutView(View):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request):
@@ -93,20 +92,38 @@ class UserProfileView(View):
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request, **kwargs):
         user = get_object_or_404(CustomUser, username=kwargs['username'])
-
-        if Relation.objects.filter(from_user=request.user, to_user=user).exists():
-            is_followed = True
-        else:
-            is_followed = False
+        is_followed = Relation.objects.filter(from_user=request.user, to_user=user).exists()
 
         context = {
             'user': user,
             'is_followed': is_followed,
+
+            'delete_url': user.get_delete_url,
+            'edit_url': user.get_edit_url,
+            'signout_url': user.get_signout_url,
+            'new_post_url': user.get_new_post_url,
+            'follow_url': user.get_follow_url,
+            'unfollow_url': user.get_unfollow_url,
+
+            'posts_list_url': user.get_posts_list_url,
+            'saved_posts_list_url': user.get_saved_posts_list_url,
+            'liked_posts_list_url': user.get_liked_posts_list_url,
+            'comments_list_url': user.get_comments_list_url,
+            'comments_list_url': user.get_comments_list_url,
+            'followers_list_url': user.get_followers_list_url,
+            'following_list_url': user.get_followers_list_url,
+
+            'posts_count': user.get_posts_count,
+            'saved_posts_count': user.get_saved_posts_count,
+            'liked_posts_count': user.get_liked_posts_count,
+            'comments_count': user.get_comments_count,
+            'followers_count': user.get_followers_count,
+            'following_count': user.get_followers_count,
         }
         return render(request, self.template_name, context)
 
@@ -118,14 +135,13 @@ class UserDeleteView(View):
     
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         if request.user != self.user_instance:
-            return redirect('accounts:profile', self.user_instance)
+            return redirect(request.META.get('HTTP_REFERER') or self.user_instance.get_profile_url)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, **kwargs):
-        user = self.user_instance
-        user.delete()
+        self.user_instance.delete()
         messages.success(request, 'Successfully deleted account')
         return redirect('home:home')
     
@@ -140,59 +156,69 @@ class UserEditView(View):
     
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         if request.user != self.user_instance:
-            return redirect('accounts:profile', self.user_instance.username)
+            return redirect(request.META.get('HTTP_REFERER') or self.user_instance.get_profile_url)
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request, **kwargs):
         user = self.user_instance
-        INITIAL = {
+        form = self.form_class(initial={
             'username': user.username,
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
             'bio': user.bio,
-            # 'image': user.image,
-        }
-        form = self.form_class(initial=INITIAL)
+            'image': user.image,
+        })
         context = {
+            'user': user,
             'form': form,
         }
         return render(request, self.template_name, context)
     
     def post(self, request, **kwargs):
-        form = self.form_class(request.POST) # form = self.form_class(request.POST, request.FILES) if you are working with file 
-        old_user = self.user_instance
+        form = self.form_class(request.POST, request.FILES)
+        user = self.user_instance
 
         if form.is_valid():
             cd = form.cleaned_data
 
-            if cd['username'] == old_user.username:
-                old_user.email = cd['email']
-                old_user.first_name = cd['first_name']
-                old_user.last_name = cd['last_name']
-                old_user.bio = cd['bio']
-                # old_user.image = cd['image']
-                old_user.save()
-                messages.success(request, 'Successfully edited account')
-                return redirect('accounts:profile', old_user.username)
-            else:
-                user = CustomUser.objects.filter(username=cd['username'])
+            if cd['username'] == user.username:
+                user.email = cd['email']
+                user.first_name = cd['first_name']
+                user.last_name = cd['last_name']
+                user.bio = cd['bio']
+                
+                if cd['image'] is not None:
+                    user.image = cd['image']
+                
+                if request.POST.get('delete_profile_picture'):
+                    user.image.delete()
 
-                if user.exists():
+                user.save()
+                messages.success(request, 'Successfully edited account')
+                return redirect(user.get_profile_url)
+            else:
+                if CustomUser.objects.filter(username=cd['username']).exists():
                     messages.error(request, 'This username already exists')
-                    return redirect(old_user.edit_account)
+                    return redirect(user.get_edit_account_url)
                 else:
-                    old_user.username = cd['username']
-                    old_user.email = cd['email']
-                    old_user.first_name = cd['first_name']
-                    old_user.last_name = cd['last_name']
-                    old_user.bio = cd['bio']
-                    # old_user.image = cd['image']
-                    old_user.save()
+                    user.username = cd['username']
+                    user.email = cd['email']
+                    user.first_name = cd['first_name']
+                    user.last_name = cd['last_name']
+                    user.bio = cd['bio']
+                    
+                    if cd['image'] is not None:
+                        user.image = cd['image']
+                    
+                    if request.POST.get('delete_profile_picture'):
+                        user.image.delete()
+
+                    user.save()
                     messages.success(request, 'Successfully edited account')
-                    return redirect('accounts:profile', old_user.username)
+                    return redirect(request.META.get('HTTP_REFERER') or user.get_profile_url)
         context = {
             'form': form,
         }
@@ -206,9 +232,9 @@ class UserFollowView(View):
     
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         if request.user == self.user_instance:
-            return redirect('accounts:profile', self.user_instance.username)
+            return redirect(request.META.get('HTTP_REFERER') or self.user_instance.get_profile_url)
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request, **kwargs):
@@ -217,7 +243,7 @@ class UserFollowView(View):
         if not Relation.objects.filter(from_user=request.user, to_user=user).exists():
             Relation.objects.create(from_user=request.user, to_user=user)
             messages.success(request, f"Successfully followed '{user.username}'")
-        return redirect('accounts:profile', user.username)
+        return redirect(request.META.get('HTTP_REFERER') or  user.get_profile_url)
 
 
 class UserUnfollowView(View):
@@ -227,9 +253,9 @@ class UserUnfollowView(View):
     
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         if request.user == self.user_instance:
-            return redirect('accounts:profile', self.user_instance.username)
+            return redirect(request.META.get('HTTP_REFERER') or self.user_instance.get_profile_url)
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request, **kwargs):
@@ -238,7 +264,7 @@ class UserUnfollowView(View):
         if Relation.objects.filter(from_user=request.user, to_user=user).exists():
             Relation.objects.get(from_user=request.user, to_user=user).delete()
             messages.success(request, f"Successfully unfollowed '{user.username}'")
-        return redirect('accounts:profile', user.username)
+        return redirect(request.META.get('HTTP_REFERER') or user.get_profile_url)
 
 
 class UserFollowersView(View):
@@ -246,15 +272,13 @@ class UserFollowersView(View):
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request, **kwargs):
         user = get_object_or_404(CustomUser, username=kwargs['username'])
-        followers = user.followers.all()
         context = {
-            'user': user,
-            'followers': followers,
+            'followers_list': user.get_followers_list,
         }
         return render(request, self.template_name, context)
 
@@ -264,15 +288,14 @@ class UserFollowingView(View):
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request, **kwargs):
         user = get_object_or_404(CustomUser, username=kwargs['username'])
-        following = user.following.all()
         context = {
             'user': user,
-            'following': following,
+            'following_list': user.get_following_list,
         }
         return render(request, self.template_name, context)
 
@@ -282,20 +305,13 @@ class UserPostsView(View):
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request, **kwargs):
         user = get_object_or_404(CustomUser, username=kwargs['username'])
-        posts = user.posts.all()
-
-        paginator = Paginator(posts, 50)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-
         context = {
-            'posts': posts,
-            'page_obj': page_obj,
+            'posts_list': user.get_posts_list,
         }
         return render(request, self.template_name, context)
     
@@ -309,22 +325,15 @@ class UserCommentsView(View):
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         if request.user != self.user_instance:
-            return redirect('accounts:profile', self.user_instance.username)
+            return redirect(request.META.get('HTTP_REFERER') or self.user_instance.get_profile_url)
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request, **kwargs):
         user = self.user_instance
-        comments = user.comments.all()
-
-        paginator = Paginator(comments, 50)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-
         context = {
-            'comments': comments,
-            'page_obj': page_obj,
+            'comments_list': user.get_comments_list,
         }
         return render(request, self.template_name, context)
 
@@ -338,21 +347,14 @@ class UserSavedPostsView(View):
     
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         if request.user != self.user_instance:
-            return redirect('accounts:profile', self.user_instance)
+            return redirect(request.META.get('HTTP_REFERER') or self.user_instance.get_profile_url)
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request, **kwargs):
-        saved_posts = self.user_instance.saved_posts.all()
-
-        paginator = Paginator(saved_posts, 50)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-
         context = {
-            'posts': saved_posts,
-            'page_obj': page_obj,
+            'saved_posts_list': self.user_instance.get_saved_posts_list,
         }
         return render(request, self.template_name, context)
 
@@ -366,20 +368,13 @@ class UserLikedPostsView(View):
     
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home:home')
+            return redirect(request.META.get('HTTP_REFERER') or 'home:home')
         if request.user != self.user_instance:
-            return redirect('accounts:profile', self.user_instance)
+            return redirect(request.META.get('HTTP_REFERER') or self.user_instance.get_profile_url)
         return super().dispatch(request, *args, **kwargs)
     
     def get(self, request, **kwargs):
-        liked_posts = self.user_instance.liked_posts.all()
-
-        paginator = Paginator(liked_posts, 50)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-
         context = {
-            'posts': liked_posts,
-            'page_obj': page_obj,
+            'liked_posts_list': self.user_instance.get_liked_posts_list,
         }
         return render(request, self.template_name, context)

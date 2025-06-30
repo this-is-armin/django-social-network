@@ -10,17 +10,14 @@
 
 {% block content %}
 
-{% if following %}
+{% if following_list %}
 <div class="container">
-    {% for f in following %}
-    <a href="{% url 'accounts:profile' f.to_user.username %}" class="card">
-        {{ f.to_user.username }}
+    {% for following in following_list %}
+    <a href="{{ following.to_user.get_profile_url }}" class="card">
+        {{ following.to_user.username }}
     </a>
     {% endfor %}
 </div>
-
-{% include 'includes/pagination.html' %}
-
 {% else %}
 <div class="no-following">There are no following at the moment</div>
 {% endif %}

@@ -15,10 +15,10 @@ class CustomUserAdmin(UserAdmin):
     ordering = ['username']
     
     add_fieldsets = UserAdmin.add_fieldsets + (
-        (None, {'fields': ('bio',)}),
+        (None, {'fields': ('bio', 'image',)}),
     )
     fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('bio',)}),
+        (None, {'fields': ('bio', 'image',)}),
     )
 
 

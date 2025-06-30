@@ -12,7 +12,11 @@
 
 <div class="container">
     <div class="info">
-        <img src="{% static 'accounts/images/default-pic.png' %}" alt="Profile Picture">
+        {% if user.image %}
+        <img src="{{ user.image.url }}" alt="Profile Picture">
+        {% else %}
+        <img src="{% static 'accounts/images/default-pic.png' %}" alt="Default Profile Picture">
+        {% endif %}   
         <h1>{{ user.first_name }} {{ user.last_name }}</h1>
         <h3>@{{ user.username }}</h3>
         <h3>{{ user.email }}</h3>
@@ -22,24 +26,24 @@
     </div>
     <div class="actions">
         {% if request.user == user %}
-        <a href="{{ user.delete_account }}" class="action">Delete Account</a>
-        <a href="{{ user.edit_account }}" class="action">Edit Account</a>
-        <a href="{{ user.signout_account }}" class="action">Sign out</a>
-        <a href="{{ user.new_post }}" class="action">Add New Post</a>
+        <a href="{{ delete_url }}" class="action">Delete Account</a>
+        <a href="{{ edit_url }}" class="action">Edit Account</a>
+        <a href="{{ signout_url }}" class="action">Sign out</a>
+        <a href="{{ new_post_url }}" class="action">Add New Post</a>
         {% endif %}
         {% if request.user != user and is_followed == False %}
-        <a href="{{ user.follow_account }}" class="action">Follow</a>
+        <a href="{{ follow_url }}" class="action">Follow</a>
         {% elif request.user != user and is_followed == True %}
-        <a href="{{ user.unfollow_account }}" class="action">Unfollow</a>
+        <a href="{{ unfollow_url }}" class="action">Unfollow</a>
         {% endif %}
-        <a href="{{ user.posts_page }}" class="action">Posts {{ user.posts_count }}</a>
+        <a href="{{ posts_list_url }}" class="action">Posts {{ posts_count }}</a>
         {% if request.user == user %}
-        <a href="{{ user.saved_posts_page }}" class="action">Saved Posts {{ user.saved_posts_count }}</a>
-        <a href="{{ user.comments_page }}" class="action">Comments {{ user.comments_count }}</a>
-        <a href="{{ user.liked_posts_page }}" class="action">Liked Posts {{ user.liked_posts_count }}</a>
+        <a href="{{ saved_posts_list_url }}" class="action">Saved Posts {{ saved_posts_count }}</a>
+        <a href="{{ comments_list_url }}" class="action">Comments {{ comments_count }}</a>
+        <a href="{{ liked_posts_list_url }}" class="action">Liked Posts {{ liked_posts_count }}</a>
         {% endif %}
-        <a href="{{ user.followers_page }}" class="action">Followers {{ user.followers_count }}</a>
-        <a href="{{ user.following_page }}" class="action">Following {{ user.following_count }}</a>
+        <a href="{{ followers_list_url }}" class="action">Followers {{ followers_count }}</a>
+        <a href="{{ following_list_url }}" class="action">Following {{ following_count }}</a>
     </div>
 </div>
 

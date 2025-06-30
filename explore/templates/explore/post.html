@@ -16,22 +16,22 @@
     </h3>
     <br>
     <h3>
-        By: <a href="{% url 'accounts:profile' post.user.username %}">{{ post.user.username }}</a>
+        By: <a href="{{ post.user.get_profile_url }}">{{ post.user.username }}</a>
     </h3>
     <br>
     <h3>
         {% if is_saved == False %}
-        <a href="{{ post.post_save }}" class="button">Save This Post</a>
+        <a href="{{ save_url }}" class="button">Save This Post</a>
         {% else %}
-        <a href="{{ post.post_unsave }}" class="button">Unsave This Post</a>
+        <a href="{{ unsave_url }}" class="button">Unsave This Post</a>
         {% endif %}
     </h3>
     <br>
     <h3>
         {% if is_liked == False %}
-        <a href="{{ post.post_like }}" class="button">Like This Post [{{ post.post_likes_count }}]</a>
+        <a href="{{ like_url }}" class="button">Like This Post [{{ likes_count }}]</a>
         {% else %}
-        <a href="{{ post.post_unlike }}" class="button">Unlike This Post [{{ post.post_likes_count }}]</a>
+        <a href="{{ unlike_url }}" class="button">Unlike This Post [{{ likes_count }}]</a>
         {% endif %}
     </h3>
 </div>
@@ -48,13 +48,13 @@
     <input type="submit" value="Send">
 </form>
 
-{% if comments %}
+{% if comments_list %}
 <br>
 <div class="container">
-    {% for comment in comments %}
+    {% for comment in comments_list %}
     <div class="comment">
         <h3>
-            By: <a href="{% url 'accounts:profile' comment.user.username %}">{{ comment.user }}</a>
+            By: <a href="{{ comment.user.get_profile_url }}">{{ comment.user.username }}</a>
         </h3>
         <h3>
             At: <span class="">{{ comment.created_at }}</span>
