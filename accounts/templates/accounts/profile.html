@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} {{ user.username }} | Profile {% endblock %}
+
+{% block extra_tags %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="user-container">
+    {% if user.image %}
+    <img src="{{ user.image.url }}" alt="profile image of {{ user.username }}" class="user-profile-image">
+    {% else %}
+    <img src="{% static 'accounts/images/default-profile-image.png' %}" alt="default profile image" class="user-profile-image">
+    {% endif %}
+    <div class="user-name-family">{{ user.first_name }} {{ user.last_name }}</div>
+    <div class="user-username">@{{ user.username }}</div>
+    <div class="user-email">{{ user.email }}</div>
+    {% if user.bio  %}
+    <div class="user-bio">{{ user.bio }}</div>
+    {% endif %}
+    {% if request.user != user and is_followed == False %}
+    <a href="{{ user.get_follow_url }}" class="btn btn-primary w-100">Follow</a>
+    {% endif %}
+    {% if request.user != user and is_followed == True %}
+    <a href="{{ user.get_unfollow_url }}" class="btn btn-danger w-100">Unfollow</a>
+    {% endif %}
+</div>
+
+<div class="actions">
+    {% if request.user == user %}
+    <a href="{{ user.get_delete_account_url }}" class="btn btn-danger">Delete Account</a>
+    <a href="{{ user.get_edit_account_url }}" class="btn btn-primary">Edit Account</a>
+    {% endif %}
+    <a href="{{ user.get_followers_list_url }}" class="btn btn-info">Followers {{ user.get_followers_count }}</a>
+    <a href="{{ user.get_following_list_url }}" class="btn btn-info">Following {{ user.get_following_count }}</a>
+    {% if request.user == user %}
+    <a href="{{ user.get_add_spark_url }}" class="btn btn-warning">Add Spark</a>
+    {% endif %}
+    <a href="{{ user.get_sparks_list_url }}" class="btn btn-warning">Sparks {{ user.get_sparks_count }}</a>
+</div>
+
+{% endblock %}

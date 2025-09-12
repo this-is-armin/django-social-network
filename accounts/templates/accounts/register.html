@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Register {% endblock %}
+
+{% block extra_tags %}
+<link rel="stylesheet" href="{% static 'accounts/css/register.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="post">
+    {% if form.errors %}
+        {% for field in form %}
+            {% for error in field.errors %}
+                <h4 class="alert alert-danger error">{{ error }}</h4>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <h4 class="alert alert-danger error">{{ error }}</h4>
+        {% endfor %}
+    {% endif %}
+
+    {% csrf_token %}
+    
+    {% for field in form %}
+        <div class="form-group">
+            {{ field }}
+        </div>
+    {% endfor %}
+
+    <input type="submit" value="Register" class="btn btn-info">
+</form>
+
+{% endblock %}

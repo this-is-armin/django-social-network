@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Followers | {{ user.username }} {% endblock %}
+
+{% block extra_tags %}
+<link rel="stylesheet" href="{% static 'accounts/css/followers_list.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="get" class="search-form">
+    <input type="text" name="search" placeholder="Search in followers..." value="{% if request.GET.search %}{{ request.GET.search }}{% endif %}" required class="form-control">
+    <input type="submit" value="Search" class="btn btn-primary">
+    {% if request.GET.search %}
+    <a href="{{ user.get_followers_list_url }}" class="btn btn-danger">Clear</a>
+    {% endif %}
+</form>
+
+{% with followers=page_obj %}
+{% if followers %}
+    <div class="followers-container">
+        {% for follower in followers %}
+            <div class="follower-card">
+                <div class="follower-name-family">{{ follower.first_name }} {{ follower.last_name }}</div>
+                <div class="follower-username">@{{ follower.username }}</div>
+                <div class="follower-email">{{ follower.email }}</div>
+                <a href="{{ follower.get_profile_url }}" class="follower-view-profile text-info">View Profile</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% include 'includes/pagination.html' %}
+{% else %}
+    <h3 class="text-danger bg-light text-center p-1 rounded container">There are no followers</h3>
+{% endif %}
+{% endwith %}
+
+{% endblock %}

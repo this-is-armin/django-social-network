@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Edit Account {% endblock %}
+
+{% block extra_tags %}
+<link rel="stylesheet" href="{% static 'accounts/css/edit_account.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="post" enctype="multipart/form-data">
+    {% if form.errors %}
+        {% for field in form %}
+            {% for error in field.errors %}
+                <h4 class="alert alert-danger error">{{ error }}</h4>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <h4 class="alert alert-danger error">{{ error }}</h4>
+        {% endfor %}
+    {% endif %}
+    
+    {% for field in form %}
+        <div class="form-group">
+            {{ field }}
+        </div>
+    {% endfor %}
+
+    {% csrf_token %}
+    
+    {% if request.user.image %}
+    <a href="{{ request.user.image.url }}" class="btn btn-primary mb-1">Current Profile Image</a>
+    <a href="{{ request.user.get_delete_profile_image_url }}" class="btn btn-danger mb-2">Delete Profile Image</a>
+    {% endif %}
+    <input type="submit" value="Edit Account" class="btn btn-info">
+</form>
+
+{% endblock %}

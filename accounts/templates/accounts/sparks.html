@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Sparks of {{ spark.sparkname }} {% endblock %}
+
+{% block extra_tags %}
+<link rel="stylesheet" href="{% static 'accounts/css/sparks.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="get" class="search-form">
+    <input type="text" name="search" placeholder="Search in sparks..." value="{% if request.GET.search %}{{ request.GET.search }}{% endif %}" required class="form-control">
+    <input type="submit" value="Search" class="btn btn-primary">
+    {% if request.GET.search %}
+    <a href="{{ user.get_sparks_list_url }}" class="btn btn-danger">Clear</a>
+    {% endif %}
+</form>
+
+{% with sparks=page_obj %}
+{% if sparks %}
+    <div class="sparks-container">
+        {% for spark in sparks %}
+            <div class="spark-card">
+                <div class="spark-user">@{{ spark.user.username }}</div>
+                <div class="spark-date">{{ spark.created_at }}</div>
+                <div class="spark-content">{{ spark.content|truncatechars:100 }}</div>
+                <a href="{{ spark.get_absolute_url }}" class="spark-detail text-info">View Spark</a>
+                {% if request.user == spark.user %}
+                <a href="{{ spark.get_edit_url }}" class="spark-detail text-primary">Edit Spark</a>
+                <a href="{{ spark.get_delete_url }}" class="spark-detail text-danger">Delete Spark</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    {% include 'includes/pagination.html' %}
+{% else %}
+    <h3 class="text-danger bg-light text-center p-1 rounded container">There are no sparks</h3>
+{% endif %}
+{% endwith %}
+
+{% endblock %}

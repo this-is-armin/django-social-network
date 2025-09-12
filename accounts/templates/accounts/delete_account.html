@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Delete Account {% endblock %}
+
+{% block extra_tags %}
+<link rel="stylesheet" href="{% static 'accounts/css/delete_account.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="post">
+    <h4 class="help-text">To delete your account, type your username: <span class="text-danger">{{ request.user.username }}</span></h3>
+    {% if form.errors %}
+        {% for field in form %}
+            {% for error in field.errors %}
+                <h4 class="alert alert-danger error">{{ error }}</h4>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <h4 class="alert alert-danger error">{{ error }}</h4>
+        {% endfor %}
+    {% endif %}
+
+    {% csrf_token %}
+    
+    {% for field in form %}
+        <div class="form-group">
+            {{ field }}
+        </div>
+    {% endfor %}
+
+    <input type="submit" value="Delete Account" class="btn btn-danger">
+</form>
+
+{% endblock %}

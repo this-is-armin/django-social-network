@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} People {% endblock %}
+
+{% block extra_tags %}
+<link rel="stylesheet" href="{% static 'accounts/css/people.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="get" class="search-form">
+    <input type="text" name="search" placeholder="Search in people..." value="{% if request.GET.search %}{{ request.GET.search }}{% endif %}" required class="form-control">
+    <input type="submit" value="Search" class="btn btn-primary">
+    {% if request.GET.search %}
+    <a href="{% url 'accounts:people' %}" class="btn btn-danger">Clear</a>
+    {% endif %}
+</form>
+
+{% with users=page_obj %}
+{% if users %}
+    <div class="people-container">
+        {% for user in users %}
+            <div class="user-card">
+                <div class="user-name-family">{{ user.first_name }} {{ user.last_name }}</div>
+                <div class="user-username">@{{ user.username }}</div>
+                <div class="user-email">{{ user.email }}</div>
+                <div class="user-date">{{ user.date_joined }}</div>
+                <div class="user-bio">Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores consectetur dignissimos fugiat? Placeat amet natus eligendi quaerat, provident, consectetur nulla dolorem adipisci laudantium officiis fugit esse! Ut voluptatum corrupti dolores.</div>
+                <a href="{{ user.get_profile_url }}" class="user-view-profile text-info">View Profile</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% include 'includes/pagination.html' %}
+{% else %}
+    <h3 class="text-danger bg-light text-center p-1 rounded container">There are no users</h3>
+{% endif %}
+{% endwith %}
+
+{% endblock %}

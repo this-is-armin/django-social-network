@@ -1,0 +1,59 @@
+.user-container {
+    width: min(75rem, 100%);
+    margin: auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: #f2f6f9;
+}
+
+.user-profile-image {
+    width: 300px;
+    height: 300px;
+    border: 1px solid black;
+    border-radius: 50%;
+}
+.user-name-family,
+.user-username,
+.user-email {
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.user-username,
+.user-email {text-transform: none;}
+.user-bio {
+    width: min(50rem, 100%);
+    text-align: center;
+}
+
+.actions {
+    width: min(75rem, 100%);
+    margin: auto;
+    margin-top: 10px;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: #f2f6f9;
+}
+.actions a {font-size: 1.2rem;}
+
+@media (max-width: 768px) {
+    .user-profile-image {
+        width: 200px;
+        height: 200px;
+    }
+    .user-name-family,
+    .user-username,
+    .user-email {font-size: 1.1rem;}
+
+    .actions {grid-template-columns: 1fr;}
+    .actions a {font-size: 0.9rem;}
+}
