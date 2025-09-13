@@ -27,7 +27,9 @@
                 <div class="user-username">@{{ user.username }}</div>
                 <div class="user-email">{{ user.email }}</div>
                 <div class="user-date">{{ user.date_joined }}</div>
-                <div class="user-bio">Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores consectetur dignissimos fugiat? Placeat amet natus eligendi quaerat, provident, consectetur nulla dolorem adipisci laudantium officiis fugit esse! Ut voluptatum corrupti dolores.</div>
+                {% if user.bio %}
+                <div class="user-bio">{{ user.bio }}</div>
+                {% endif %}
                 <a href="{{ user.get_profile_url }}" class="user-view-profile text-info">View Profile</a>
             </div>
         {% endfor %}
