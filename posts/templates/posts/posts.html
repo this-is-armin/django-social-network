@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %} Explore {% endblock %}
+
+{% block content %}
+
+<form action="" method="get" class="container form-group search-form mt-5 mb-5">
+    <input type="text" name="search" placeholder="Search in posts..." class="form-control" required>
+    <input type="submit" value="Search" class="btn btn-primary">
+    {% if request.GET.search %}
+    <a href="{% url 'posts:posts' %}" class="btn btn-danger">×</a>
+    {% endif %}
+</form>
+
+{% with posts=page_obj %}
+    {% if posts %}
+    <div class="row">
+        {% for post in posts %}
+        <div class="col-md-6">
+            <div class="card mt-2 mb-2">
+                <div class="card-header">
+                    <h5><a href="{{ post.user.get_profile_url }}">@{{ post.user.username }}</a></h5>
+                    <h6 class="text-secondary">{{ post.created_at }}</h6>
+                </div>
+                <div class="card-body">
+                    {{ post.body|truncatechars:150 }}
+                </div>
+                <div class="p-1">
+                    <a href="{{ post.get_absolute_url }}" class="btn btn-primary w-100">View More</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% include 'includes/pagination.html' %}
+    {% else %}
+    <div class="text-center p-3">
+        <strong>There are no posts yet.</strong>
+    </div>
+    {% endif %}
+{% endwith %}
+
+{% endblock %}

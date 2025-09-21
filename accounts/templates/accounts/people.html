@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} People {% endblock %}
+
+{% block content %}
+
+<form action="" method="get" class="container form-group search-form mt-5 mb-5">
+    <input type="text" name="search" placeholder="Search in people..." class="form-control" required>
+    <input type="submit" value="Search" class="btn btn-primary">
+    {% if request.GET.search %}
+    <a href="{% url 'accounts:people' %}" class="btn btn-danger">×</a>
+    {% endif %}
+</form>
+
+{% with users=page_obj %}
+    {% if users %}
+    <div class="row">
+        {% for user in users %}
+        <div class="col-md-6">
+            <div class="card mt-2 mb-2">
+                <div class="card-header">
+                    <h5 class="text-primary">@{{ user.username }}</h5>
+                    <p>{{ user.first_name }} {{ user.last_name }}</p>
+                </div>
+                {% if user.bio %}
+                <div class="card-body">
+                    <p class="card-text">{{ user.bio }}</p>
+                </div>
+                {% endif %}
+                <div class="p-1">
+                    <a href="{{ user.get_profile_url }}" class="btn btn-primary w-100">View Profile</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% include 'includes/pagination.html' %}
+    {% else %}
+    <div class="text-center p-3">
+        <strong>There are no people yet.</strong>
+    </div>
+    {% endif %}
+{% endwith %}
+
+{% endblock %}

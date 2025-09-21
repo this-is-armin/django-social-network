@@ -1,0 +1,12 @@
+<header class="bg-dark">
+    <a href="{% url 'social_network' %}" class="text-light">SocialNetwork</a>
+    {% if request.user.is_authenticated %}
+    <a href="{% url 'posts:posts' %}" class="text-light">Explore</a>
+    <a href="{% url 'accounts:people' %}" class="text-light">People</a>
+    <a href="{% url 'accounts:profile' request.user.username %}" class="text-light">Profile</a>
+    <a href="{% url 'notifications:notifications' %}" class="text-light">Notifications {{ request.user.get_notifications_count }}</a>
+    {% else %}
+    <a href="{% url 'accounts:register' %}" class="text-light">Register</a>
+    <a href="{% url 'accounts:login' %}" class="text-light">Login</a>
+    {% endif %}
+</header>

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} {{ user.username }} | Profile {% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'accounts/js/script.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4 text-center mt-1">
+            {% if user.image %}
+            <img src="{{ user.image.url }}" alt="profile image of {{ user.username }}" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+            {% else %}
+            <img src="{% static 'accounts/images/default_profile_image.png' %}" alt="default profile image" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+            {% endif %}
+            <h4>@{{ user.username }}</h4>
+            {% if request.user == user %}
+            <div class="d-grid gap-2">
+                <a href="{{ user.get_edit_url }}" class="btn btn-outline-primary m-1">Edit Account</a>
+                <a href="{{ user.get_create_post_url }}" class="btn btn-outline-success m-1">Create Post</a>
+                <a href="{% url 'accounts:logout' %}" class="btn btn-outline-secondary">Logout</a>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <div class="card mt-1">
+                <div class="card-header">
+                    <h5>User Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>First Name:</strong> {{ user.first_name }}</p>
+                    <p><strong>Last Name:</strong> {{ user.last_name }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    {% if user.bio %}
+                    <p><strong>Bio:</strong> {{ user.bio }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mt-3">
+                {% if request.user != user %}
+                <div class="btn-group" role="group">
+                    {% if is_followed == False %}
+                    <a href="{{ user.get_follow_url }}" class="btn btn-primary">Follow</a>
+                    {% endif %}
+                    {% if is_followed == True %}
+                    <a href="{{ user.get_unfollow_url }}" class="btn btn-secondary">Unfollow</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+                <div class="mt-2">
+                    <a href="{{ user.get_followers_url }}" class="btn btn-outline-info">Followers {{ user.get_followers_count }}</a>
+                    <a href="{{ user.get_following_url }}" class="btn btn-outline-info">Following {{ user.get_following_count }}</a>
+                    <a href="{{ user.get_posts_url }}" class="btn btn-outline-info">Posts {{ user.get_posts_count }}</a>
+                </div>
+            </div>
+            {% if request.user == user %}
+            <div class="mt-3">
+                <a href="{{ user.get_delete_url }}" class="btn btn-danger" id="delete_account_link">
+                    Delete Account
+                </a>
+                {% if user.image %}
+                <a href="{{ user.get_delete_profile_image_url }}" class="btn btn-danger" id="delete_profile_image_link">
+                    Delete Profile Image
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
