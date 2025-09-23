@@ -25,7 +25,7 @@
                     {% elif notif.notification_type == 'comment' and notif.comment %}
                         <a href="{{ notif.from_user.get_profile_url }}">{{ notif.from_user }}</a> commented on your <a href="{{ notif.comment.post.get_absolute_url }}">post</a>.
                     {% elif notif.notification_type == 'like' and notif.like %}
-                        <a href="{{ notif.from_user.get_profile_url }}">{{ notif.from_user }}</a> liked your <a href="{{ notif.post.get_absolute_url }}">post</a>.
+                        <a href="{{ notif.from_user.get_profile_url }}">{{ notif.from_user }}</a> liked your <a href="{{ notif.like.post.get_absolute_url }}">post</a>.
                     {% endif %}
                 </div>
                 <div class="p-1">
