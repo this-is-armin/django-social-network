@@ -21,18 +21,19 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
-# Main Page (/)
+# Main View (/)
 def social_network(request):
     return render(request, 'index.html')
 
 
 urlpatterns = [
+    # Django admin panel
     path('admin/', admin.site.urls),
 
     # main page
     path('', social_network, name='social_network'),
 
-    # local apps
+    # local apps' routes
     path('posts/', include('posts.urls', namespace='posts')),
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('notifications/', include('notifications.urls', namespace='notifications')),

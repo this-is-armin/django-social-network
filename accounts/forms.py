@@ -3,8 +3,6 @@ from django.contrib.auth.forms import AdminUserCreationForm, UserChangeForm
 from django.core.exceptions import ValidationError
 from django import forms
 
-from posts.models import Post
-
 from utils.validators import form_field_validator
 
 
@@ -178,18 +176,3 @@ class AccountEditForm(forms.Form):
     def clean_last_name(self):
         last_name = self.cleaned_data.get('last_name')
         return form_field_validator('Last Name', last_name)
-
-
-class PostCreateEditForm(forms.ModelForm):
-    class Meta:
-        model = Post
-        fields = ['body']
-        labels = {
-            'body': '',
-        }
-        widgets = {
-            'body': forms.Textarea(attrs={
-                'placeholder': 'Write your post...',
-                'class': 'form-control',
-            }),
-        }

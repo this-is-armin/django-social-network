@@ -1,5 +1,20 @@
 from django import forms
-from .models import Comment
+from .models import Comment, Post
+
+
+class PostCreateEditForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['body']
+        labels = {
+            'body': '',
+        }
+        widgets = {
+            'body': forms.Textarea(attrs={
+                'placeholder': 'Write your post...',
+                'class': 'form-control',
+            }),
+        }
 
 
 class CommentForm(forms.ModelForm):

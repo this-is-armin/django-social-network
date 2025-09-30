@@ -10,7 +10,6 @@ from .forms import (
     RegisterForm,
     LoginForm,
     AccountEditForm,
-    PostCreateEditForm,
 )
 
 from utils.mixins import (
@@ -20,7 +19,6 @@ from utils.mixins import (
 )
 from utils.pagination import get_pagination_context
 
-from posts.models import Post
 from notifications.models import Notification
 
 
@@ -244,73 +242,3 @@ class PostsView(LoginRequiredMixin, View):
             'user': user,
             'page_obj': get_pagination_context(request, posts, 10),
         })
-
-
-class PostCreateView(LoginRequiredMixin, OwnerRequiredMixin, View):
-    template_name = 'accounts/post_create.html'
-    form_class = PostCreateEditForm
-
-    def get(self, request, **kwargs):
-        return render(request, self.template_name, {
-            'form': self.form_class(),
-        })
-
-    def post(self, request, **kwargs):
-        form = self.form_class(request.POST)
-
-        if form.is_valid():
-            user = get_object_or_404(User, username=kwargs['username'])
-            post = form.save(commit=False)
-            post.user = request.user
-            post.save()
-            
-            for follower in user.get_followers():
-                Notification.objects.create(
-                    from_user=post.user,
-                    to_user=follower,
-                    notification_type='post',
-                    post=post,
-                )
-
-            messages.success(request, 'Successfully created post', 'info')
-            return redirect(request.user.get_profile_url())
-        return render(request, self.template_name, {
-            'form': form,
-        })
-
-
-class PostEditView(LoginRequiredMixin, OwnerRequiredMixin, View):
-    template_name = 'accounts/post_edit.html'
-    form_class = PostCreateEditForm
-
-    def setup(self, request, *args, **kwargs):
-        self.post_instance = get_object_or_404(Post, pk=kwargs['pk'])
-        return super().setup(request, *args, **kwargs)
-
-    def get(self, request, **kwargs):
-        post = self.post_instance
-        return render(request, self.template_name, {
-            'form': self.form_class(instance=post),
-        })
-
-    def post(self, request, **kwargs):
-        post = self.post_instance
-        form = self.form_class(request.POST, instance=post)
-
-        if form.is_valid():
-            post = form.save()
-            post.user = request.user
-            post.save()
-            messages.success(request, 'Successfully edited post', 'info')
-            return redirect(post.get_absolute_url())
-        return render(request, self.template_name, {
-            'form': form,
-        })
-
-
-class PostDeleteView(LoginRequiredMixin, OwnerRequiredMixin, View):
-    def get(self, request, **kwargs):
-        user = get_object_or_404(User, username=kwargs['username'])
-        get_object_or_404(Post, user=user, pk=kwargs['pk']).delete()
-        messages.success(request, 'Successfully deleted post', 'info')
-        return redirect(user.get_posts_url())

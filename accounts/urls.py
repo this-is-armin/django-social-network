@@ -23,8 +23,4 @@ urlpatterns = [
     path('<username>/following/', views.FollowingView.as_view(), name='following'),
 
     path('<username>/posts/', views.PostsView.as_view(), name='posts'),
-
-    path('<username>/create-post/', views.PostCreateView.as_view(), name='create_post'),
-    path('<username>/posts/<pk>/edit/', views.PostEditView.as_view(), name='edit_post'),
-    path('<username>/posts/<pk>/delete/', views.PostDeleteView.as_view(), name='delete_post'),
 ]

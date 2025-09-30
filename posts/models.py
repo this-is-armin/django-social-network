@@ -22,10 +22,10 @@ class Post(models.Model):
         return reverse('posts:post_detail', args=[self.pk])
 
     def get_edit_url(self):
-        return reverse('accounts:edit_post', args=[self.user.username, self.pk])
+        return reverse('posts:edit_post', args=[self.pk])
 
     def get_delete_url(self):
-        return reverse('accounts:delete_post', args=[self.user.username, self.pk])
+        return reverse('posts:delete_post', args=[self.pk])
     
     def get_likes_count(self):
         return self.likes.count()

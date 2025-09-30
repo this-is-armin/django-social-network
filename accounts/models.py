@@ -1,32 +1,59 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, RegexValidator
 from django.core.exceptions import ValidationError
-from django.utils.text import slugify
 from django.conf import settings
 from django.urls import reverse
 from django.db import models
 
-import os
+from utils.validators import username_validator
+from utils.paths import get_user_image_upload_path
 
 
 User = settings.AUTH_USER_MODEL
 
 
-def generate_user_profile_image_path(instance, filename):
-    username = slugify(instance.username)
-    filename = f"{username}{os.path.splitext(filename)[1]}"
-    file_path = f"accounts/{username}/{filename}"
-    full_path = os.path.join(settings.MEDIA_ROOT, file_path)
-
-    if os.path.isfile(full_path):
-        os.remove(full_path)
-    return file_path
-
-
 class CustomUser(AbstractUser):
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        validators=[username_validator],
+        help_text='Required. 150 characters or fewer. Lowercase letters, number and _/.',
+        error_messages={
+            'unique': 'This username already exists.',
+        },
+    )
+    email = models.EmailField(
+        unique=True,
+        help_text='Required. Must be a valid and unique email address.',
+        verbose_name='email address',
+        error_messages={
+            'unique': 'This email address already exists.',
+        },
+    )
+    first_name = models.CharField(
+        max_length=30,
+        help_text='Required. 30 characters or fewer. Letters only.',
+        validators=[
+            RegexValidator(
+                regex=r'^[a-zA-Z]+$',
+                message='First name must contain only letters.',
+            )
+        ]
+    )
+    last_name = models.CharField(
+        max_length=30,
+        help_text='Required. 30 characters or fewer. Letters only.',
+        validators=[
+            RegexValidator(
+                regex=r'^[a-zA-Z]+$',
+                message='Last name must contain only letters.',
+            )
+        ]
+    )
+    
     bio = models.TextField(max_length=200, blank=True, null=True)
     image = models.ImageField(
-        upload_to=generate_user_profile_image_path,
+        upload_to=get_user_image_upload_path,
         blank=True,
         null=True,
         validators=[FileExtensionValidator(allowed_extensions=['png', 'jpg', 'jpeg', 'gif'])],
@@ -73,7 +100,7 @@ class CustomUser(AbstractUser):
         return reverse('accounts:following', args=[self.username])
 
     def get_create_post_url(self):
-        return reverse('accounts:create_post', args=[self.username])
+        return reverse('posts:create_post')
     
     def get_posts_count(self):
         return self.posts.count()
