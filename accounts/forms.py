@@ -3,7 +3,7 @@ from django.contrib.auth.forms import AdminUserCreationForm, UserChangeForm
 from django.core.exceptions import ValidationError
 from django import forms
 
-from utils.validators import form_field_validator
+from utils.validators import UsernameValidator, NameValidator
 
 
 User = get_user_model()
@@ -23,8 +23,9 @@ class CustomUserChangeForm(UserChangeForm):
 
 class RegisterForm(forms.Form):
     username = forms.CharField(
-        max_length=100, 
-        label='', 
+        max_length=100,
+        label='',
+        validators=[UsernameValidator()],
         widget=forms.TextInput(attrs={
             'placeholder': 'Your Username',
             'class': 'form-control',
@@ -40,14 +41,16 @@ class RegisterForm(forms.Form):
     first_name = forms.CharField(
         max_length=100, 
         label='', 
+        validators=[NameValidator(field_name='First Name')],
         widget=forms.TextInput(attrs={
             'placeholder': 'Your First Name',
             'class': 'form-control',
         }),
     )
     last_name = forms.CharField(
-        max_length=100, 
-        label='', 
+        max_length=100,
+        label='',
+        validators=[NameValidator(field_name='Last Name')],
         widget=forms.TextInput(attrs={
             'placeholder': 'Your Last Name',
             'class': 'form-control',
@@ -74,19 +77,15 @@ class RegisterForm(forms.Form):
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        form_field_validator('Username', username)
-
         if User.objects.filter(username=username).exists():
             raise ValidationError('This username already exists')
         return username
     
-    def clean_first_name(self):
-        first_name = self.cleaned_data.get('first_name')
-        return form_field_validator('First Name', first_name)
-    
-    def clean_last_name(self):
-        last_name = self.cleaned_data.get('last_name')
-        return form_field_validator('Last Name', last_name)
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise ValidationError('This email address already exists')
+        return email
     
     def clean(self):
         cd = super().clean()
@@ -118,8 +117,9 @@ class LoginForm(forms.Form):
 
 class AccountEditForm(forms.Form):
     username = forms.CharField(
-        max_length=100, 
-        label='', 
+        max_length=100,
+        label='',
+        validators=[UsernameValidator()],
         widget=forms.TextInput(attrs={
             'placeholder': 'Your Username',
             'class': 'form-control',
@@ -133,16 +133,18 @@ class AccountEditForm(forms.Form):
         }),
     )
     first_name = forms.CharField(
-        max_length=100, 
-        label='', 
+        max_length=100,
+        label='',
+        validators=[NameValidator(field_name='First Name')],
         widget=forms.TextInput(attrs={
             'placeholder': 'Your First Name',
             'class': 'form-control',
         }),
     )
     last_name = forms.CharField(
-        max_length=100, 
-        label='', 
+        max_length=100,
+        label='',
+        validators=[NameValidator(field_name='Last Name')],
         widget=forms.TextInput(attrs={
             'placeholder': 'Your Last Name',
             'class': 'form-control',
@@ -164,15 +166,3 @@ class AccountEditForm(forms.Form):
             'class': 'form-control',
         }),
     )
-
-    def clean_username(self):
-        username = self.cleaned_data.get('username')
-        return form_field_validator('Username', username)
-    
-    def clean_first_name(self):
-        first_name = self.cleaned_data.get('first_name')
-        return form_field_validator('First Name', first_name)
-    
-    def clean_last_name(self):
-        last_name = self.cleaned_data.get('last_name')
-        return form_field_validator('Last Name', last_name)

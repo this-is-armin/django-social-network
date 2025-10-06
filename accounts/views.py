@@ -5,22 +5,19 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.db.models import Q
 
+from notifications.models import Notification
+from utils.pagination import get_pagination_context
+from utils.mixins import (
+    AnonymousRequiredMixin,
+    OwnerRequiredMixin,
+    SelfForbiddenMixin,
+)
 from .models import Relation
 from .forms import (
     RegisterForm,
     LoginForm,
     AccountEditForm,
 )
-
-from utils.mixins import (
-    AnonymousRequiredMixin,
-    OwnerRequiredMixin,
-    SelfForbiddenMixin,
-)
-from utils.pagination import get_pagination_context
-
-from notifications.models import Notification
-
 
 User = get_user_model()
 
@@ -146,6 +143,8 @@ class AccountEditView(LoginRequiredMixin, OwnerRequiredMixin, View):
 
             if User.objects.filter(username=cd['username']).exclude(username=user.username).exists():
                 form.add_error('username', 'This username already exists')
+            elif User.objects.filter(email=cd['email']).exclude(email=user.email).exists():
+                form.add_error('email', 'This email address already exists')
             else:
                 user.username = cd['username']
                 user.email = cd['email']

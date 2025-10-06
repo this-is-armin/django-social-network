@@ -1,11 +1,11 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import FileExtensionValidator, RegexValidator
+from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.urls import reverse
 from django.db import models
 
-from utils.validators import username_validator
+from utils.validators import UsernameValidator, NameValidator
 from utils.paths import get_user_image_upload_path
 
 
@@ -16,7 +16,7 @@ class CustomUser(AbstractUser):
     username = models.CharField(
         max_length=150,
         unique=True,
-        validators=[username_validator],
+        validators=[UsernameValidator()],
         help_text='Required. 150 characters or fewer. Lowercase letters, number and _/.',
         error_messages={
             'unique': 'This username already exists.',
@@ -33,22 +33,12 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(
         max_length=30,
         help_text='Required. 30 characters or fewer. Letters only.',
-        validators=[
-            RegexValidator(
-                regex=r'^[a-zA-Z]+$',
-                message='First name must contain only letters.',
-            )
-        ]
+        validators=[NameValidator('First Name')],
     )
     last_name = models.CharField(
         max_length=30,
         help_text='Required. 30 characters or fewer. Letters only.',
-        validators=[
-            RegexValidator(
-                regex=r'^[a-zA-Z]+$',
-                message='Last name must contain only letters.',
-            )
-        ]
+        validators=[NameValidator('Last Name')],
     )
     
     bio = models.TextField(max_length=200, blank=True, null=True)

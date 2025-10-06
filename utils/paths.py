@@ -1,7 +1,7 @@
+import os
+
 from django.utils.text import slugify
 from django.conf import settings
-
-import os
 
 
 def get_user_image_upload_path(instance, filename):
