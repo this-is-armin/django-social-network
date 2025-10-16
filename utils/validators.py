@@ -28,8 +28,9 @@ class UsernameValidator:
             'Username must contain only lowercase letters, numbers and _/.'
         )
 
-        if value in INVALID_NAMES:
-            raise ValidationError(f"{value} is not allowed as a username")
+        for name in self.invalid_names:
+            if name in value:
+                raise ValidationError(f"'{value}' is not allowed as a username")
         if value.isdigit():
             raise ValidationError('Username cannot be only numbers.')
         if all(char in '._' for char in value):

@@ -1,3 +1,5 @@
+import random
+
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -7,6 +9,7 @@ from django.db.models import Q
 
 from notifications.models import Notification
 from utils.pagination import get_pagination_context
+from utils.base import send_otp_code
 from utils.mixins import (
     AnonymousRequiredMixin,
     OwnerRequiredMixin,
@@ -16,8 +19,10 @@ from .models import Relation
 from .forms import (
     RegisterForm,
     LoginForm,
+    ResetPasswordForm,
     AccountEditForm,
 )
+
 
 User = get_user_model()
 
@@ -60,6 +65,7 @@ class RegisterView(AnonymousRequiredMixin, View):
             user = User.objects.create_user(username=cd['username'], email=cd['email'], password=cd['password'])
             user.first_name = cd['first_name']
             user.last_name = cd['last_name']
+            user.phone_number = cd['phone_number']
             user.save()
             messages.success(request, 'Successfully registered', 'info')
             return redirect('accounts:login')
@@ -102,6 +108,97 @@ class LogoutView(LoginRequiredMixin, View):
         return redirect('social_network')
 
 
+# ---- RESET PASSWORD ----
+
+class SendOTPCodeView(AnonymousRequiredMixin, View):
+    template_name = 'accounts/send_otp_code.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+    
+    def post(self, request):
+        phone_number = request.POST.get('phone_number')
+
+        if User.objects.filter(phone_number=phone_number).exists():
+            """
+            Send otp_code to the phone_number.
+            """
+            otp_code = str(random.randint(1000, 9999))
+            send_otp_code(phone_number, otp_code)
+
+            # In testing mode
+            print(f"\n\n{phone_number} - {otp_code}\n\n")
+            
+            request.session['phone_number'] = phone_number
+            request.session['otp_code'] = otp_code
+
+            messages.success(request, 'We sent you a code', 'info')
+            return redirect('accounts:verify_otp_code')
+        messages.error(request, 'There is no user with this phone number', 'danger')
+        return redirect('accounts:send_otp_code')
+
+
+class VerifyOTPCodeView(AnonymousRequiredMixin, View):
+    template_name = 'accounts/verify_otp_code.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.session.get('otp_code'):
+            return redirect('accounts:send_otp_code')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        return render(request, self.template_name)
+    
+    def post(self, request):
+        input_otp_code = request.POST.get('otp_code')
+        real_otp_code = request.session.get('otp_code')
+
+        if input_otp_code == real_otp_code:
+            request.session['otp_code_verified'] = True
+            messages.success(request, 'The code verified', 'info')
+            return redirect('accounts:reset_password')
+        messages.error(request, 'Incorrect Code', 'danger')
+        return redirect('accounts:verify_otp_code')
+
+
+class ResetPasswordView(AnonymousRequiredMixin, View):
+    template_name = 'accounts/reset_password.html'
+    form_class = ResetPasswordForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.session.get('otp_code_verified'):
+            return redirect('accounts:verify_otp_code')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        return render(request, self.template_name, {
+            'form': self.form_class(),
+        })
+    
+    def post(self, request):
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+            cd = form.cleaned_data
+            phone_number = request.session.get('phone_number')
+
+            user = get_object_or_404(User, phone_number=phone_number)
+            user.set_password(cd['password'])
+            user.save()
+
+            del request.session['phone_number']
+            del request.session['otp_code']
+            del request.session['otp_code_verified']
+
+            messages.success(request, 'Successfully changed password', 'info')
+            return redirect('accounts:login')
+        return render(request, self.template_name, {
+            'form': form,
+        })
+
+# ---- END RESET PASSWORD ----
+
+
 class ProfileView(LoginRequiredMixin, View):
     template_name = 'accounts/profile.html'
 
@@ -130,6 +227,7 @@ class AccountEditView(LoginRequiredMixin, OwnerRequiredMixin, View):
                 'email': user.email,
                 'first_name': user.first_name,
                 'last_name': user.last_name,
+                'phone_number': user.phone_number,
                 'bio': user.bio,
             }),
         })
@@ -145,11 +243,14 @@ class AccountEditView(LoginRequiredMixin, OwnerRequiredMixin, View):
                 form.add_error('username', 'This username already exists')
             elif User.objects.filter(email=cd['email']).exclude(email=user.email).exists():
                 form.add_error('email', 'This email address already exists')
+            elif User.objects.filter(phone_number=cd['phone_number']).exclude(phone_number=cd['phone_number']).exists():
+                form.add_error('phone_number', 'This phone number already exists.')
             else:
                 user.username = cd['username']
                 user.email = cd['email']
                 user.first_name = cd['first_name']
                 user.last_name = cd['last_name']
+                user.phone_number = cd['phone_number']
                 user.bio = cd['bio']
 
                 if cd['image'] is not None:

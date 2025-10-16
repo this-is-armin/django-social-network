@@ -9,6 +9,10 @@ urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
+
+    path('send-otp-code/', views.SendOTPCodeView.as_view(), name='send_otp_code'),
+    path('verify-otp-code/', views.VerifyOTPCodeView.as_view(), name='verify_otp_code'),
+    path('reset-password/', views.ResetPasswordView.as_view(), name='reset_password'),
     
     path('<username>/', views.ProfileView.as_view(), name='profile'),
 

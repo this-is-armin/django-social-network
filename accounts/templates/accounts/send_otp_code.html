@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Send Code to reset Password {% endblock %}
+
+{% block content %}
+
+<form action="" method="post" class="">
+    {% csrf_token %}
+    <div class="form-group">
+        <input type="tel" name="phone_number" class="form-control" maxlength="15" placeholder="Your Phone Number">
+    </div>
+    <input type="submit" value="Send Code" class="btn btn-primary">
+</form>
+
+{% endblock %}

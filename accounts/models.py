@@ -40,7 +40,15 @@ class CustomUser(AbstractUser):
         help_text='Required. 30 characters or fewer. Letters only.',
         validators=[NameValidator('Last Name')],
     )
-    
+
+    phone_number = models.CharField(
+        max_length=15,
+        unique=True,
+        help_text='Required. 15 characters or fewer.',
+        error_messages={
+            'unique': 'This phone number already exists.',
+        },
+    )
     bio = models.TextField(max_length=200, blank=True, null=True)
     image = models.ImageField(
         upload_to=get_user_image_upload_path,
@@ -49,7 +57,10 @@ class CustomUser(AbstractUser):
         validators=[FileExtensionValidator(allowed_extensions=['png', 'jpg', 'jpeg', 'gif'])],
     )
 
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'phone_number']
+
     class Meta:
+        ordering = ['username']
         verbose_name = 'User'
         verbose_name_plural = 'Users'
 

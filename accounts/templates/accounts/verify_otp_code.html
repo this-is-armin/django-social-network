@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Verify Code to reset Password {% endblock %}
+
+{% block content %}
+
+<form action="" method="post" class="">
+    {% csrf_token %}
+    <div class="form-group">
+        <input type="number" name="otp_code" class="form-control" placeholder="Your Code">
+    </div>
+    <input type="submit" value="Verify Code" class="btn btn-primary">
+</form>
+
+{% endblock %}
