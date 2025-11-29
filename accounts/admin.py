@@ -11,18 +11,29 @@ User = get_user_model()
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    model = User
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
-
     list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff']
     list_filter = ['is_staff', 'is_superuser', 'is_active', 'groups']
-
     add_fieldsets = UserAdmin.add_fieldsets + (
-        ('Personal Infi', {'fields': ('bio', 'image',)}),
+        (
+            'Personal Information', {
+                'fields': (
+                    'bio',
+                    'image',
+                )
+            }
+        ),
     )
     fieldsets = UserAdmin.fieldsets + (
-        ('Personal Info', {'fields': ('bio', 'image',)}),
+        (
+            'Personal Info', {
+                'fields': (
+                    'bio',
+                    'image',
+                )
+            }
+        ),
     )
 
 
