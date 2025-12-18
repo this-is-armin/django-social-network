@@ -3,7 +3,12 @@ from django.contrib.auth.forms import AdminUserCreationForm, UserChangeForm
 from django.core.exceptions import ValidationError
 from django import forms
 
-from utils.validators import UsernameValidator, NameValidator
+from utils.validators import (
+    UsernameValidator,
+    NameValidator,
+    URLValidator,
+)
+from .models import Story
 
 
 User = get_user_model()
@@ -12,7 +17,12 @@ User = get_user_model()
 class CustomUserCreationForm(AdminUserCreationForm):
     class Meta:
         model = User
-        fields = AdminUserCreationForm.Meta.fields + ('phone_number', 'bio', 'image',)
+        fields = AdminUserCreationForm.Meta.fields + (
+            'phone_number',
+            'bio',
+            'image',
+            'website_url',
+        )
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -178,3 +188,39 @@ class AccountEditForm(BaseUserForm):
             'class': 'form-control',
         }),
     )
+    website_url = forms.URLField(
+        label='',
+        required=False,
+        validators=[URLValidator()],
+        widget=forms.URLInput(attrs={
+            'placeholder': 'Your website url',
+            'class': 'form-control',
+        }),
+    )
+
+
+class AccountDeleteForm(forms.Form):
+    username = forms.CharField(
+        max_length=100,
+        label='',
+        validators=[UsernameValidator()],
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Your Username',
+            'class': 'form-control',
+        }),
+    )
+
+
+class StoryCreateForm(forms.ModelForm):
+    class Meta:
+        model = Story
+        fields = ['content']
+        labels = {
+            'content': '',
+        }
+        widgets = {
+            'content': forms.Textarea(attrs={
+                'placeholder': 'Write your idea...',
+                'class': 'form-control',
+            }),
+        }

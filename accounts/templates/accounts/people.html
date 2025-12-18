@@ -6,42 +6,75 @@
 
 {% block content %}
 
-<form action="" method="get" class="container form-group search-form mt-5 mb-5">
-    <input type="text" name="search" placeholder="Search in people..." class="form-control" required>
-    <input type="submit" value="Search" class="btn btn-primary">
-    {% if request.GET.search %}
-    <a href="{% url 'accounts:people' %}" class="btn btn-danger">×</a>
-    {% endif %}
-</form>
+<div class="container mt-5">
+    <form method="get" class="mb-5">
+        <div class="input-group input-group-lg shadow-sm">
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                placeholder="Search people..."
+                value="{{ request.GET.search }}"
+                required
+            >
+            <button class="btn btn-primary px-4" type="submit">
+                Search
+            </button>
 
-{% with users=page_obj %}
-    {% if users %}
-    <div class="row">
-        {% for user in users %}
-        <div class="col-md-6">
-            <div class="card mt-2 mb-2">
-                <div class="card-header">
-                    <h5 class="text-primary">@{{ user.username }}</h5>
-                    <p>{{ user.first_name }} {{ user.last_name }}</p>
-                </div>
-                {% if user.bio %}
-                <div class="card-body">
-                    <p class="card-text">{{ user.bio }}</p>
-                </div>
-                {% endif %}
-                <div class="p-1">
-                    <a href="{{ user.get_profile_url }}" class="btn btn-primary w-100">View Profile</a>
+            {% if request.GET.search %}
+            <a href="{% url 'accounts:people' %}" class="btn btn-outline-danger px-4">
+                Clear
+            </a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% with users=page_obj %}
+        {% if users %}
+        <div class="row g-4">
+            {% for user in users %}
+            <div class="col-lg-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-white border-0">
+                        <h5 class="mb-0 text-primary fw-bold">
+                            @{{ user.username }}
+                        </h5>
+                        {% if user.first_name or user.last_name %}
+                        <small class="text-muted">
+                            {{ user.first_name }} {{ user.last_name }}
+                        </small>
+                        {% endif %}
+                    </div>
+
+                    {% if user.bio %}
+                    <div class="card-body">
+                        <p class="card-text text-secondary">
+                            {{ user.bio|truncatechars:120 }}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <div class="card-footer bg-white border-0">
+                        <a href="{{ user.get_profile_url }}"
+                           class="btn btn-outline-primary w-100">
+                            View Profile →
+                        </a>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-    {% include 'includes/pagination.html' %}
-    {% else %}
-    <div class="text-center p-3">
-        <strong>There are no people yet.</strong>
-    </div>
-    {% endif %}
-{% endwith %}
+
+        <div class="mt-5">
+            {% include 'includes/pagination.html' %}
+        </div>
+
+        {% else %}
+        <div class="text-center py-5">
+            <h5 class="text-muted">No people found 😕</h5>
+        </div>
+        {% endif %}
+    {% endwith %}
+</div>
 
 {% endblock %}

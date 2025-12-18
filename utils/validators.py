@@ -48,3 +48,10 @@ class NameValidator:
             r'^[a-zA-Z]+$',
             f"{self.field_name} must contain only letters."
         )
+
+
+@deconstructible
+class URLValidator:
+    def __call__(self, value):
+        if not value.startswith('https://'):
+            raise ValidationError('URL must starts with https://')

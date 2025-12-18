@@ -3,11 +3,12 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
+from django.db.models import Count
 
 from notifications.models import Notification
 from utils.pagination import get_pagination_context
 from utils.mixins import PostOwnerRequiredMixin
-from .models import Post, Like
+from .models import Post, Like, Save
 from .forms import CommentForm, PostCreateEditForm
 
 
@@ -18,11 +19,15 @@ class PostsView(LoginRequiredMixin, View):
     template_name = 'posts/posts.html'
 
     def get(self, request):
-        posts = Post.objects.all()
+        # posts = Post.objects.all()
+        posts = Post.objects.annotate(
+            likes_count=Count('likes'),
+            comments_count=Count('comments'),
+        ).order_by('-likes_count', '-comments_count', '-created_at')
 
         if request.GET.get('search'):
             search = request.GET['search']
-            posts = posts.filter(body__contains=search)
+            posts = posts.filter(body__icontains=search)
 
         return render(request, self.template_name, {
             'page_obj': get_pagination_context(request, posts, 10),
@@ -79,10 +84,12 @@ class PostDetailView(LoginRequiredMixin, View):
     def get(self, request, **kwargs):
         post = self.post_instance
         is_liked = Like.objects.filter(user=request.user, post=post).exists() or False
+        is_saved = Save.objects.filter(user=request.user, post=post) or False
         comments = post.comments.all()
         return render(request, self.template_name, {
             'post': post,
             'is_liked': is_liked,
+            'is_saved': is_saved,
             'comments': comments,
             'form': self.form_class(),
         })
@@ -177,4 +184,25 @@ class PostUnlikeView(LoginRequiredMixin, View):
         if like.exists():
             like.delete()
             messages.success(request, 'Successfully unliked post', 'info')
+        return redirect(post.get_absolute_url())
+
+
+class PostSaveView(LoginRequiredMixin, View):
+    def get(self, request, **kwargs):
+        post = get_object_or_404(Post, pk=kwargs['pk'])
+
+        if not Save.objects.filter(user=request.user, post=post).exists():
+            Save.objects.create(user=request.user, post=post)
+            messages.success(request, 'Successfully saved post', 'info')
+        return redirect(post.get_absolute_url())
+
+
+class PostUnSaveView(LoginRequiredMixin, View):
+    def get(self, request, **kwargs):
+        post = get_object_or_404(Post, pk=kwargs['pk'])
+        saved = Save.objects.filter(user=request.user, post=post)
+
+        if saved.exists():
+            saved.delete()
+            messages.success(request, 'Successfully unsaved post', 'info')
         return redirect(post.get_absolute_url())

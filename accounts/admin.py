@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Relation
+from .models import Relation, Story
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
 
@@ -21,6 +21,7 @@ class CustomUserAdmin(UserAdmin):
                 'fields': (
                     'bio',
                     'image',
+                    'website_url',
                 )
             }
         ),
@@ -31,6 +32,7 @@ class CustomUserAdmin(UserAdmin):
                 'fields': (
                     'bio',
                     'image',
+                    'website_url',
                 )
             }
         ),
@@ -42,3 +44,10 @@ class RelationAdmin(admin.ModelAdmin):
     list_display = ['id', 'from_user', 'to_user', 'created_at']
     list_filter = ['from_user', 'to_user', 'created_at']
     search_fields = ['from_user__bio', 'to_user__bio']
+
+
+@admin.register(Story)
+class StoryAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'created_at']
+    list_filter = ['user', 'created_at']
+    search_fields = ['content']

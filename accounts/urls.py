@@ -1,4 +1,5 @@
 from django.urls import path
+
 from . import views
 
 
@@ -27,4 +28,8 @@ urlpatterns = [
     path('<username>/following/', views.FollowingView.as_view(), name='following'),
 
     path('<username>/posts/', views.PostsView.as_view(), name='posts'),
+    path('<username>/saved-posts/', views.SavedPostsView.as_view(), name='saved_posts'),
+
+    path('<username>/create-story/', views.StoryCreateView.as_view(), name='create_story'),
+    path('<username>/delete-story/<int:pk>/', views.StoryDeleteView.as_view(), name='delete_story'),
 ]

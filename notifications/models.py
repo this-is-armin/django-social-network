@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.urls import reverse
 
-from accounts.models import Relation
+from accounts.models import Relation, Story
 from posts.models import Post, Comment, Like
 
 
@@ -15,6 +15,7 @@ class Notification(models.Model):
         ('post', 'Post'),
         ('comment', 'Comment'),
         ('like', 'Like'),
+        {'story', 'Story'}
     )
 
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_notifications')
@@ -27,6 +28,7 @@ class Notification(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True)
     like = models.ForeignKey(Like, on_delete=models.CASCADE, blank=True, null=True)
+    story = models.ForeignKey(Story, on_delete=models.CASCADE, blank=True, null=True)
 
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -16,6 +16,9 @@ class Post(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
+        return self.get_short_body()
+    
+    def get_short_body(self):
         return (self.body[:20] + '...') if len(self.body) > 20 else self.body
 
     def get_absolute_url(self):
@@ -30,11 +33,23 @@ class Post(models.Model):
     def get_likes_count(self):
         return self.likes.count()
     
+    def get_comments_count(self):
+        return self.comments.count()
+    
+    def get_saves_count(self):
+        return self.saves.count()
+    
     def get_like_url(self):
-        return reverse('posts:like', args=[self.pk])
+        return reverse('posts:like_post', args=[self.pk])
     
     def get_unlike_url(self):
-        return reverse('posts:unlike', args=[self.pk])
+        return reverse('posts:unlike_post', args=[self.pk])
+    
+    def get_save_url(self):
+        return reverse('posts:save_post', args=[self.pk])
+    
+    def get_unsave_url(self):
+        return reverse('posts:unsave_post', args=[self.pk])
 
 
 class Comment(models.Model):
@@ -60,3 +75,16 @@ class Like(models.Model):
     
     def __str__(self):
         return f"{self.user} liked {self.post}"
+
+
+class Save(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_posts')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='saves')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ['user', 'post']
+    
+    def __str__(self):
+        return f"{self.user.username} saved {self.post.get_short_body()}"

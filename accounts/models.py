@@ -1,12 +1,19 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import FileExtensionValidator
-from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.urls import reverse
 from django.db import models
+from django.utils import timezone
 
-from utils.validators import UsernameValidator, NameValidator
+from posts.models import Post
 from utils.paths import get_user_image_upload_path
+from utils.validators import (
+    UsernameValidator,
+    NameValidator,
+    URLValidator,
+)
 
 
 User = settings.AUTH_USER_MODEL
@@ -55,6 +62,13 @@ class CustomUser(AbstractUser):
         blank=True,
         null=True,
         validators=[FileExtensionValidator(allowed_extensions=['png', 'jpg', 'jpeg', 'gif'])],
+    )
+    website_url = models.URLField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text='100 characters or fewer. must starts with https://',
+        validators=[URLValidator()],
     )
 
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'phone_number']
@@ -109,8 +123,23 @@ class CustomUser(AbstractUser):
     def get_posts_url(self):
         return reverse('accounts:posts', args=[self.username])
     
+    def get_saved_posts_url(self):
+        return reverse('accounts:saved_posts', args=[self.username])
+    
+    def get_saved_posts_count(self):
+        return self.saved_posts.count()
+    
+    def get_saved_posts(self):
+        return Post.objects.filter(saves__user=self)
+    
     def get_notifications_count(self):
         return self.notifications.filter(is_read=False).count()
+    
+    def get_create_story_url(self):
+        return reverse('accounts:create_story', args=[self.username])
+    
+    def get_stories_count(self):
+        return self.stories.count()
 
 
 class Relation(models.Model):
@@ -120,14 +149,28 @@ class Relation(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        unique_together = ['from_user', 'to_user']
     
     def __str__(self):
         return f'{self.from_user} followed {self.to_user}'
+
+
+class Story(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='stories')
+    content = models.TextField(max_length=120)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
     
-    def clean(self):
-        if self.from_user == self.to_user:
-            raise ValidationError('Users can not follow themselves')
+    def __str__(self):
+        return f"{self.user.username} - {self.get_short_content()}"
+
+    def get_short_content(self):
+        return (self.content[:20] + '...') if len(self.content) > 20 else self.content
     
-    def save(self, *args, **kwargs):
-        self.clean()
-        return super().save(*args, **kwargs)
+    def is_expired(self):
+        return self.created_at < timezone.now() - timedelta(minutes=1)
+    
+    def get_delete_story_url(self):
+        return reverse('accounts:delete_story', args=[self.user.username, self.pk])

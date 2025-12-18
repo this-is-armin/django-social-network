@@ -4,61 +4,127 @@
 
 {% block content %}
 
-<div class="mb-3">
-    {% if request.user == post.user %}
-    <a href="{{ post.get_edit_url }}" class="btn btn-primary">Edit</a>
-    <a href="{{ post.get_delete_url }}" class="btn btn-danger">Delete</a>
-    {% endif %}
-    {% if not is_liked %}
-    <a href="{{ post.get_like_url }}" class="btn btn-info">Like {{ post.get_likes_count }}</a>
-    {% else %}
-    <a href="{{ post.get_unlike_url }}" class="btn btn-secondary">Unlike {{ post.get_likes_count }}</a>
-    {% endif %}
-</div>
+<div class="container mt-5">
 
-<h5><a href="{{ post.user.get_profile_url }}">@{{ post.user.username }}</a></h5>
-<h6 class="text-secondary mb-4">{{ post.created_at }}</h6>
-<p>{{ post.body|linebreaks }}</p>
+    <!-- Post Card -->
+    <div class="card shadow-sm border-0 mb-4">
 
-<hr>
+        <!-- Header -->
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+            <div>
+                <a href="{{ post.user.get_profile_url }}" class="fw-bold text-decoration-none">
+                    @{{ post.user.username }}
+                </a>
+                <div class="text-muted small">
+                    {{ post.created_at|date:"M d, Y · H:i" }}
+                </div>
+            </div>
 
-<form action="" method="post">
-    {% csrf_token %}
+            <!-- Actions -->
+            <div class="d-flex gap-2">
+                {% if request.user == post.user %}
+                <a href="{{ post.get_edit_url }}" class="btn btn-sm btn-outline-primary mx-1">
+                    Edit
+                </a>
+                <a href="{{ post.get_delete_url }}" class="btn btn-sm btn-outline-danger mx-1">
+                    Delete
+                </a>
+                {% endif %}
 
-    {% if form.errors %}
-        {% for field in form %}
-            {% for error in field.errors %}
-                <div class="alert alert-danger text-center mt-2 mb-2">{{ error }}</div>
-            {% endfor %}
-        {% endfor %}
-        {% for error in form.non_field_errors %}
-            <div class="alert alert-danger text-center mt-2 mb-2">{{ error }}</div>
-        {% endfor %}
-    {% endif %}
-
-    {% for field in form %}
-        <div class="form-group">
-            {{ field }}
+                {% if not is_liked %}
+                <a href="{{ post.get_like_url }}" class="btn btn-sm btn-info text-white mx-1">
+                    👍 Like {{ post.get_likes_count }}
+                </a>
+                {% else %}
+                <a href="{{ post.get_unlike_url }}" class="btn btn-sm btn-secondary mx-1">
+                    👎 UnLike {{ post.get_likes_count }}
+                </a>
+                {% endif %}
+                
+                <!-- save section -->
+                {% if not is_saved %}
+                <a href="{{ post.get_save_url }}" class="btn btn-sm btn-info text-white mx-1">
+                    Save {{ post.get_saves_count }}
+                </a>
+                {% else %}
+                <a href="{{ post.get_unsave_url }}" class="btn btn-sm btn-secondary mx-1">
+                    UnSave {{ post.get_saves_count }}
+                </a>
+                {% endif %}
+            </div>
         </div>
-    {% endfor %}
-    <input type="submit" value="Send Comment" class="btn btn-primary">
-</form>
 
-{% if comments %}
-<div class="mt-4">
-    {% for comment in comments %}
-    <div class="card mt-1 mb-1">
-        <div class="card-header">
-            <a href="{{ comment.user.get_profile_url }}">@{{ comment.user.username }}</a>
-            <br>
-            <small>{{ comment.created_at }}</small>
-        </div>
+        <!-- Body -->
         <div class="card-body">
-            {{ comment.body|linebreaks }}
+            <p class="fs-5 text-secondary">
+                {{ post.body|linebreaks }}
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Comment Form -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">💬 Leave a Comment</h5>
+
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                {% for field in form %}
+                <div class="mb-3">
+                    {{ field }}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn-primary px-4">
+                    Send Comment
+                </button>
+            </form>
         </div>
     </div>
-    {% endfor %}
+
+    <!-- Comments -->
+    {% if comments %}
+    <div class="mt-4">
+
+        <h5 class="mb-3">Comments ({{ comments.count }})</h5>
+
+        {% for comment in comments %}
+        <div class="card shadow-sm border-0 mb-3">
+
+            <div class="card-header bg-white border-0">
+                <a href="{{ comment.user.get_profile_url }}" class="fw-bold text-decoration-none">
+                    @{{ comment.user.username }}
+                </a>
+                <div class="small text-muted">
+                    {{ comment.created_at|date:"M d, Y · H:i" }}
+                </div>
+            </div>
+
+            <div class="card-body">
+                <p class="mb-0 text-secondary">
+                    {{ comment.body|linebreaks }}
+                </p>
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+    {% endif %}
+
 </div>
-{% endif %}
 
 {% endblock %}
